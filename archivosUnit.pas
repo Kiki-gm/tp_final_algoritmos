@@ -6,18 +6,18 @@ type
     dataType = integer;
     fileType = file of dataType;
 
-procedure InitializeFile(var f : fileType; path : String);
-procedure ReadFile(var f : fileType; pos : Cardinal; var data : dataType);
-procedure WriteFile(var f : fileType; pos : Cardinal; data : dataType);
-procedure ShowFile(var f : fileType);
-procedure ShowFileLine(var f : fileType; pos : Cardinal);
-function FileLastI(var f : fileType): Integer;
+procedure InicializarArchivo(var f : fileType; path : String);
+procedure LeerArchivo(var f : fileType; pos : Cardinal; var data : dataType);
+procedure EscribirArchivo(var f : fileType; pos : Cardinal; data : dataType);
+procedure MostrarArchivo(var f : fileType);
+procedure MostrarLineaArchivo(var f : fileType; pos : Cardinal);
+function UltimaLinea(var f : fileType): Integer;
 
 
 
 implementation
 
-    procedure InitializeFile(var f : fileType; path : String);
+    procedure InicializarArchivo(var f : fileType; path : String);
     begin
         Assign (f,path);
         {$i-}
@@ -27,7 +27,7 @@ implementation
             Rewrite(f);
     end;
 
-    procedure ReadFile(var f : fileType; pos : Cardinal; var data : dataType);
+    procedure LeerArchivo(var f : fileType; pos : Cardinal; var data : dataType);
     var
         lastPos : Cardinal;
     begin
@@ -37,7 +37,7 @@ implementation
         Seek(f, lastPos);
     end;
 
-    procedure WriteFile(var f : fileType; pos : Cardinal; data : dataType);
+    procedure EscribirArchivo(var f : fileType; pos : Cardinal; data : dataType);
     var
         lastPos : Cardinal;
     begin
@@ -47,7 +47,7 @@ implementation
         Seek(f, lastPos);
     end;
 
-    procedure ShowFile(var f : fileType);
+    procedure MostrarArchivo(var f : fileType);
     var
         lastPos : Cardinal;
         tempData : dataType;
@@ -62,7 +62,7 @@ implementation
         Seek(f,lastPos);
     end;
 
-    procedure ShowFileLine(var f : fileType; pos : Cardinal);
+    procedure MostrarLineaArchivo(var f : fileType; pos : Cardinal);
     var
         lastPos : Cardinal;
         tempData : dataType;
@@ -74,9 +74,9 @@ implementation
         Seek(f, lastPos);
     end;
 
-    function FileLastI(var f : fileType): Integer;
+    function UltimaLinea(var f : fileType): Integer;
     begin
-        FileLastI := FileSize(f) - 1;
+        UltimaLinea := FileSize(f) - 1;
     end;
 
 end.

@@ -3,7 +3,7 @@ unit menu;
 
 interface
 
-uses archivoClientesUnit, archivoPolizasUnit, arbolUnit, clientesUnit, polizasUnit, verificacionUnit, estadisticasUnit, listadosUnit; 
+uses interfazDeUsuarioUnit, archivoClientesUnit, archivoPolizasUnit, arbolUnit, clientesUnit, polizasUnit, verificacionUnit, estadisticasUnit, listadosUnit; 
 procedure menuPrincipal;
 
 
@@ -12,16 +12,18 @@ implementation
 
     procedure menuPrincipal;
     var
+        {Todo lo que sigue no tengo ni idea que sera (?}
         //archivoClientes : TipoArchivosClientes;
         //archivoPolizas : TipoArchivoPolizas;
         //arbolDNI, arbolNombre : TipoArbol;
         opcion : 0..4;
+        temp : String;
     begin
+        {Inicializaciones i guess}
         // CREAR_ABRIR ARCHIVOS
         // GENERAR ARBOLES
+        opcion := 0;
         repeat
-            Write('Ingrese opcion: ');
-            ReadLn(opcion);
             case opcion of
                 1:
                     begin

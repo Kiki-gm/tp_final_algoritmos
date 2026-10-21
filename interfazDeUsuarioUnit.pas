@@ -8,16 +8,24 @@ uses crt;
 
 type
     tecla = (arriba,abajo,escape,enter);
-
+    Vector2 = record
+        x : Word;
+        y : Word;
+    end;
 
 function leerTecla : tecla;
-procedure dimensionesDeTerminal(var x : Word; var y : Word);
-procedure dibujarCaja(x1 : Word; y1 : Word; x2 : Word; y2 : Word);
-
-
+function dimensionesDeTerminal : Vector2;
+procedure dibujarCaja(esquinaSuperiorIzquierda : Vector2; esquinaInferiorDerecha : Vector2);
+procedure dibujarEscape;
+procedure dibujarVentana(titulo : String; ancho : Word; alto : Word);
+procedure dibujarMenuPrincipal(seleccion : Byte);
+function adentroDeVentanaActual(coordenadas : Vector2) : Boolean;
 
 
 implementation
+
+    var
+        topLeftCorner, bottomRightCorner : Vector2;
 
     function leerTecla : tecla;
     var
@@ -88,31 +96,92 @@ implementation
         until keyDetected;
     end;
 
-    procedure dimensionesDeTerminal(var x : Word; var y : Word);
+    function dimensionesDeTerminal : Vector2;
     begin
-        x := WindMaxX;
-        y := WindMaxY;
+        dimensionesDeTerminal.x := WindMaxX;
+        dimensionesDeTerminal.y := WindMaxY;
     end;
 
-    procedure dibujarCaja(x1 : Word; y1 : Word; x2 : Word; y2 : Word);
+    procedure dibujarCaja(esquinaSuperiorIzquierda : Vector2; esquinaInferiorDerecha : Vector2);
     var
         i,j : Word;
     begin
-        for i := x1 to x2 do
+        for i := esquinaSuperiorIzquierda.x to esquinaInferiorDerecha.x do
         begin
-            for j := y1 to y2 do
+            for j := esquinaSuperiorIzquierda.y to esquinaInferiorDerecha.y do
             begin
                 GotoXY(i,j);
-                if j = y1 then
+                if j = esquinaSuperiorIzquierda.y then
                     Write('#')
-                else if j = y2 then
+                else if j = esquinaInferiorDerecha.y then
                     Write('#')
-                else if i = x1 then
+                else if i = esquinaSuperiorIzquierda.x then
                     Write('#')
-                else if i = x2 then
+                else if i = esquinaInferiorDerecha.x then
                     Write('#');
             end;
         end;
+    end;
+
+    procedure dibujarMenuPrincipal(seleccion : Byte);
+    begin
+
+    end;
+
+    procedure dibujarVentana(titulo : String; ancho : Word; alto : Word);
+    var
+        middle, topLeft, bottomRight : Vector2;
+    begin
+        bottomRight := dimensionesDeTerminal;
+        
+        if ancho < Length(titulo) then
+            ancho := Length(titulo);
+        
+        if ancho > bottomRight.x then
+            ancho := bottomRight.x;
+        
+        if (alto + 2) > bottomRight.y then
+            alto := bottomRight.y - 2;
+
+        middle.x := bottomRight.x div 2;
+        middle.y := bottomRight.y div 2;
+
+        topLeft.x := middle.x - (ancho div 2);
+        topLeft.y := middle.y - (alto div 2);
+        bottomRight.x := middle.x + (ancho div 2);
+        bottomRight.y := middle.y + (alto div 2);
+
+        TextColor(Blue);
+        dibujarCaja(topLeft,bottomRight);
+        GotoXY(middle.x + 1 - (Length(titulo) div 2), topLeft.y + 1);
+        TextColor(LightBlue);
+        Write(titulo);
+        TextColor(White);
+    end;
+
+    procedure dibujarEscape;
+    begin
+        GotoXY(1,1);
+        TextColor(Blue);
+        WriteLn('#-----------------#');
+        GotoXY(1,2);
+        Write('| ');
+        TextColor(White);
+        Write('Atras');
+        TextColor(LightBlue);
+        Write(' -> ');
+        TextColor(White);
+        Write('Escape');
+        TextColor(Blue);
+        WriteLn(' |');
+        GotoXY(1,3);
+        WriteLn('#-----------------#');
+        TextColor(White);
+    end;
+
+    function adentroDeVentanaActual(coordenadas : Vector2) : Boolean;
+    begin
+
     end;
 
 end.

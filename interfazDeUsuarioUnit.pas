@@ -57,12 +57,12 @@ implementation
                 begin
                     ch := ReadKey;
                     case ch of
-                        #72, #87: 
+                        #72, #87: // La flecha para arriba y la flecha para arriba + shift por si acaso
                         begin
                             leerTecla := arriba;
                             keyDetected := true;
                         end;
-                        #80, #83:
+                        #80, #83: // Lo mismo que arriba pero con la flecha para abajo
                         begin
                             leerTecla := abajo;
                             keyDetected := true;
@@ -79,7 +79,7 @@ implementation
                     leerTecla := enter;
                     keyDetected := true;
                 end;
-                'W', 'w':
+                'W', 'w': // No vay a ser que el mañoso del usuario tenga las mayus activadas
                 begin
                     leerTecla := arriba;
                     keyDetected := true;
@@ -139,10 +139,14 @@ implementation
             middle.x := bottomRight.x div 2;
             middle.y := bottomRight.y div 2;
 
-            topLeft.x := middle.x - (ancho div 2);
-            topLeft.y := middle.y - (alto div 2);
-            bottomRight.x := middle.x + (ancho div 2);
-            bottomRight.y := middle.y + (alto div 2);
+            topLeft.x := middle.x - ancho div 2;
+            topLeft.y := middle.y - alto div 2;
+            bottomRight.x := middle.x + ancho div 2;
+            if (alto mod 2 = 1) then
+                bottomRight.y := middle.y + alto div 2
+            else
+                bottomRight.y := (middle.y + alto div 2) - 1;
+
 
             {Dibujado(? de ventana}
             TextColor(Blue);

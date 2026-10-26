@@ -1,7 +1,58 @@
 unit listadosUnit;
 
 interface
+uses archivoPolizasUnit, archivoClientesUnit;
+
 
 implementation
+
+Procedure suprimirEspacios(var fullName: String; var simpleName: String); //Si se toma un String "fullname" con espacios, entonces la salida "simpleName" no los tendrá.
+var
+  i : cardinal;
+begin
+    simplename := fullname;
+    for i := 1 to sizeof(fullname[i]) do
+    begin
+        if fullname[i] = ' ' then
+            delete(simplename,i,1);
+    end;
+
+    end;
+end;
+
+Procedure QuicksortApellidoNombre(var arch: tarchivoCliente ; path: String; first: byte; last: byte); //En un futuro se sustituirá por un árbol de búsqueda.
+var
+  lower, upper: byte;
+  temp, tempLower, tempUpper, pivot: datoscliente;
+begin
+    inicializarArchivoCliente(arch,path);
+    lower := first;
+    upper := last;
+    seek(arch,(lower + upper) div 2);
+    read(arch,pivot);
+
+    repeat
+        seek(arch,lower);
+        read(arch,tempLower);
+        while tempLower.apellidoYNombre < pivot do
+            inc(lower);
+        seek(arch,upper);
+        read(arch,tempUpper);
+        while tempUpper.apellidoYNombre > pivot do
+            dec(upper);
+        if lower <= upper then
+        begin
+            seek(arch,lower);
+            read(arch, temp);
+            tempLower := tempUpper;
+            tempUpper := temp;
+            inc(lower);
+            dec(upper);
+    until lower > upper;
+    if upper > first then
+        QuicksortApellidoNombre(vec, path, first, upper);
+    if lower < last then
+        QuicksortApellidoNombre(vec, path, lower, last);
+end;  
 
 end.

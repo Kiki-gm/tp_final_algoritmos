@@ -54,9 +54,9 @@ begin
         end;
     until lower > upper;
     if upper > first then
-        QuicksortApellidoNombre(vec, path, first, upper);
+        QuicksortApellidoNombre(arch, path, first, upper);
     if lower < last then
-        QuicksortApellidoNombre(vec, path, lower, last);
+        QuicksortApellidoNombre(arch, path, lower, last);
 end;  
 
 end.

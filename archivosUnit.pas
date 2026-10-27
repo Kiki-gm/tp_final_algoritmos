@@ -78,5 +78,5 @@ implementation
     begin
         UltimaLinea := FileSize(f) - 1;
     end;
-
+    
 end.

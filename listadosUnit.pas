@@ -1,10 +1,10 @@
 unit listadosUnit;
 
 interface
-uses archivoPolizasUnit, archivoClientesUnit;
+uses archivoPolizasUnit, archivoClientesUnit, clientesUnit, polizasUnit;
 
 Procedure suprimirEspacios(var fullName: String; var simpleName: String); // Creo que esto puede ir a la unit de validaciones, o podemos crear una unit aparte para trabajar los strings, pero no estoy seguro, lo hablamos en clase.
-Procedure QuicksortApellidoNombre(var arch: tarchivoCliente ; path: String; first: Word; last: Word);
+Procedure QuicksortApellidoNombre(var arch: tArchivoClientes ; path: String; first: Word; last: Word);
 
 implementation
 
@@ -22,38 +22,42 @@ implementation
     end;
 
     //En un futuro se sustituirá por un árbol de búsqueda.
-    Procedure QuicksortApellidoNombre(var arch: tarchivoCliente ; path: String; first: Word; last: Word);
+    Procedure QuicksortApellidoNombre(var arch: tArchivoClientes ; path: String; first: Word; last: Word);
     var
     lower, upper: Word;
-    temp, tempLower, tempUpper, pivot: datoscliente;
+    temp, tempLower, tempUpper, pivot: datosCliente;
     begin
-        inicializarArchivoCliente(arch,path);
+        InicializarArchivoClientes(arch,path);
         lower := first;
         upper := last;
-        seek(arch,(lower + upper) div 2);
-        read(arch,pivot);
+        LeerArchivoClientes(arch, (lower + upper) div 2, pivot);
 
         repeat
-            seek(arch,lower);
-            read(arch,tempLower);
-            while tempLower.apellidoYNombre < pivot do
+            LeerArchivoClientes(arch,lower,tempLower);
+
+            while tempLower.apellidoYNombres < pivot.apellidoYNombres do
+            begin
                 inc(lower);
-            seek(arch,upper);
-            read(arch,tempUpper);
-            while tempUpper.apellidoYNombre > pivot do
+                LeerArchivoClientes(arch,upper,tempUpper);
+            end;
+            
+            while tempUpper.apellidoYNombres > pivot.apellidoYNombres do
                 dec(upper);
+
             if lower <= upper then
             begin
-                seek(arch,lower);
-                read(arch, temp);
+                LeerArchivoClientes(arch,lower,temp);
                 tempLower := tempUpper;
                 tempUpper := temp;
                 inc(lower);
                 dec(upper);
             end;
+
         until lower > upper;
+
         if upper > first then
             QuicksortApellidoNombre(arch, path, first, upper);
+        
         if lower < last then
             QuicksortApellidoNombre(arch, path, lower, last);
     end;  

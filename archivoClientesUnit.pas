@@ -1,7 +1,7 @@
 unit archivoClientesUnit;
 
 interface
-    uses clientesUnit;
+    uses clientesUnit, tiposUnit;
 
     type
         tArchivoClientes = file of datosCliente;

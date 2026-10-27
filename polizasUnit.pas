@@ -3,7 +3,7 @@ unit polizasUnit;
 interface
 
 type
-    tipoFecha = record
+    tFecha = record
         yy : word;
         mm : 1..12;
         dd : 1..31;
@@ -12,13 +12,13 @@ type
     datospoliza = record
         DNI : String[8];
         fecha : record;
-            carga : tipoFecha;
-            vigenciaDesde : tipoFecha;
-            vigenciaHasta : tipoFecha;
+            carga : tFecha;
+            vigenciaDesde : tFecha;
+            vigenciaHasta : tFecha;
         marca : String[20];
         modelo : String[40]; //Algunos modelos tienen nombres bastante largos.
         yearVehicle : word;  //Me rehuso a utilizar "anioVehiculo", por más que sea lo ideal.
-        patente : String[8]; //Considerar la posibilidad de los formatos "AA111AA" Y "AAA111" coexistiendo.
+        patente : String[7]; //Considerar la posibilidad de los formatos "AA111AA" Y "AAA111" coexistiendo.
         sumaAsegurada : Real;
         tipoCobertura : String[4]; //RC, IRT, IRTP, TC, TR.
         valorCuota : Real;

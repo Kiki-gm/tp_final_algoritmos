@@ -6,7 +6,6 @@ uses archivoPolizasUnit, archivoClientesUnit;
 Procedure suprimirEspacios(var fullName: String; var simpleName: String);
 Procedure QuicksortApellidoNombre(var arch: tarchivoCliente ; path: String; first: byte; last: byte);
 
-
 implementation
 
 //Si se toma un String "fullname" con espacios, entonces la salida "simpleName" no los tendrá.

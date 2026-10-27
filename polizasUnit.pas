@@ -11,10 +11,11 @@ type
 
     datospoliza = record
         DNI : String[8];
-        fecha : record;
+        fecha : record
             carga : tFecha;
             vigenciaDesde : tFecha;
             vigenciaHasta : tFecha;
+        end;
         marca : String[20];
         modelo : String[40]; //Algunos modelos tienen nombres bastante largos.
         yearVehicle : word;  //Me rehuso a utilizar "anioVehiculo", por más que sea lo ideal.
@@ -23,8 +24,7 @@ type
         tipoCobertura : String[4]; //RC, IRT, IRTP, TC, TR.
         valorCuota : Real;
         estado : Boolean;
-  end; 
-
+end;
 
 implementation
 

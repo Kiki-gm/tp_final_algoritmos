@@ -1,20 +1,21 @@
 unit archivoClientesUnit;
 
 interface
+uses clientesUnit,archivosUnit;
 
 type
     datosCliente = record
-        DNI : String[8];
-        apellidoYNombres : String[64];
-        direccion : String[32];
-        fechaDeNacimiento : String[8];
-        celular : String[32];
-        email : String[64];    
+        DNI : tDNI;
+        apellidoYNombres : tApellidoYNombres;
+        direccion : tDireccion;
+        fechaDeNacimiento : tFecha; //Nótese que la fecha se ha cambiado de un String[8] a un record. Considerar revertir el cambio de ser conveniente.
+        celular : tCelular;
+        email : tEmail;    
         activo : Boolean;
     end;
 
-implementation
-    uses archivosUnit, clientesUnit;
+    tArchivoCliente = file of datosCliente;
 
+implementation
 
 end.

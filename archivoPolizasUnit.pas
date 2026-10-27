@@ -2,7 +2,7 @@ unit archivoPolizasUnit;
 
 interface
 
-uses archivosUnit;
+uses archivosUnit,polizasUnit;
 
 implementation
 

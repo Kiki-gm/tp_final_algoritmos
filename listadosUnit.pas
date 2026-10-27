@@ -11,10 +11,10 @@ implementation
 //Si se toma un String "fullname" con espacios, entonces la salida "simpleName" no los tendrá.
 Procedure suprimirEspacios(var fullName: String; var simpleName: String);
 var
-  i : cardinal;
+  i : Cardinal;
 begin
     simplename := fullname;
-    for i := 1 to sizeof(fullname[i]) do
+    for i := 1 to sizeof(fullname) do
     begin
         if fullname[i] = ' ' then
             delete(simplename,i,1);

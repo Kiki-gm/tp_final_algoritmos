@@ -4,8 +4,13 @@ unit menuUnit;
 interface
 
 uses crt, interfazDeUsuarioUnit, archivoClientesUnit, archivoPolizasUnit, arbolUnit, clientesUnit, polizasUnit, verificacionUnit, estadisticasUnit, listadosUnit; 
+
 procedure menuPrincipal;
 procedure salirDelPrograma;
+procedure gestionDeClientes;
+procedure gestionDePolizas;
+procedure listado;
+procedure estadisticas;
 
 implementation
 
@@ -23,9 +28,30 @@ implementation
                 temp := temp + '.';
             end;
             dibujarVentana('Saliendo' + temp, 15, 5);
+            GotoXY(dimensionesDeTerminal.x,dimensionesDeTerminal.y);
             Delay(1000);
         end;
         ClrScr;
+    end;
+
+    procedure gestionDeClientes;
+    begin
+      
+    end;
+
+    procedure gestionDePolizas;
+    begin
+      
+    end;
+
+    procedure listado;
+    begin
+      
+    end;
+
+    procedure estadisticas; 
+    begin
+      
     end;
 
     procedure menuPrincipal;
@@ -40,19 +66,22 @@ implementation
         agregarOpcion(menuActual, 'Gestion de polizas');
         agregarOpcion(menuActual, 'Listado');
         agregarOpcion(menuActual, 'Estadisticas');
-        seleccion := 1;
-        
-        menu('Menu principal', menuActual, seleccion);
 
-        // case seleccion of 
-        //     -1: salirDelPrograma;
-        //     1: gestionDeClientes;
-        //     2: gestionDePolizas;
-        //     3: listado;
-        //     4: estadisticas;
-        // end;
-        
-        WriteLn('Presiona una tecla para salir...');
-        ReadKey;
+        seleccion := 1;
+
+        repeat
+
+            seleccion := 1;
+            menu('Menu principal', menuActual, seleccion, false);
+
+            case seleccion of 
+                -1: salirDelPrograma;
+                1: gestionDeClientes;
+                2: gestionDePolizas;
+                3: listado;
+                4: estadisticas;
+            end;
+
+        until seleccion = -1;
     end;
 end.

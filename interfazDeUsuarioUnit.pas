@@ -4,13 +4,13 @@ unit interfazDeUsuarioUnit;
 
 interface
     
-uses crt;
+uses crt, verificacionUnit, tiposUnit;
 
 const
     maxOpciones = 64;
 
 type
-    tecla = (arriba, abajo, izquierda, derecha, escape, enter, desconocido);
+    tecla = (arriba, abajo, izquierda, derecha, escape, enter, numero, texto, borrar);
 
     Vector2 = record
         x : Word;
@@ -20,6 +20,7 @@ type
     infoVentana = record
         topLeft : Vector2;
         bottomRight : Vector2;
+        cursor : Vector2;
     end;
 
     registroMenu = record
@@ -28,22 +29,21 @@ type
     end;
 
 function leerTecla : tecla;
+function leerSoloNumeros(var stringModificable : String; max : Word) : tecla;
+function leerSoloTexto(var stringModificable : String; max : Word) : tecla;
 function dimensionesDeTerminal : Vector2;
 procedure dibujarCaja(esquinaSuperiorIzquierda : Vector2; esquinaInferiorDerecha : Vector2);
 procedure dibujarEscape(salir : Boolean);
-function dibujarVentana(titulo : String; ancho : Word; alto : Word) : infoVentana;
+procedure escribirEnVentana(ventana : infoVentana; input : String);
+function dibujarVentana(titulo : String; anchoMinimo : Word; altoMinimo : Word) : infoVentana;
 procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer);
-procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer);
+procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer; anchoMinimo : Word; altoMinimo : Word);
 function adentroDeVentanaActual(coordenadas : Vector2; windowInfo : infoVentana) : Boolean;
 procedure inicializarMenu(var menuData : registroMenu);
 procedure agregarOpcion(var menuData : registroMenu; opcion : String);
 
 
-
 implementation
-
-    var
-        windowSize : infoVentana;
 
     function leerTecla : tecla;
     var
@@ -90,7 +90,7 @@ implementation
                     leerTecla := enter;
                     keyDetected := true;
                 end;
-                'W', 'w': // No vay a ser que el mañoso del usuario tenga las mayus activadas
+                'W', 'w':
                 begin
                     leerTecla := arriba;
                     keyDetected := true;
@@ -112,6 +112,86 @@ implementation
                 end;
             end;
         until keyDetected;
+    end;
+
+    function leerSoloTexto(var stringModificable : String; max : Word) : tecla;
+    var
+        ch : Char;
+    begin
+        ch := ReadKey;
+        
+        if (ch >= #32) and (ch <= #126) then 
+        begin
+            if Length(stringModificable) < max then 
+            begin
+                stringModificable := stringModificable + ch;
+                leerSoloTexto := texto; 
+            end;
+        end
+        else
+        begin
+            case ch of
+                #8: 
+                begin
+                    if Length(stringModificable) > 0 then
+                        Delete(stringModificable, Length(stringModificable), 1);
+                    leerSoloTexto := borrar;
+                end;
+                #13:
+                    leerSoloTexto := enter;
+                #27: 
+                    leerSoloTexto := escape;
+                #0:
+                begin
+                    ch := ReadKey;
+                    leerSoloTexto := arriba;
+                end;
+            end;
+        end;
+    end;
+
+    function leerSoloNumeros(var stringModificable : String; max : Word) : tecla;
+    var
+        teclaPresionada : String;
+    begin
+        teclaPresionada := ReadKey;
+
+        if esNumero(teclaPresionada) and (Length(stringModificable) < max) then
+        begin
+            stringModificable := stringModificable + teclaPresionada;
+            leerSoloNumeros := numero;
+        end;
+
+        case teclaPresionada of
+            #0: 
+            begin
+                teclaPresionada := ReadKey;
+                if teclaPresionada = #83 then
+                    Delete(stringModificable,Length(stringModificable),1);
+                leerSoloNumeros := borrar;
+            end;
+            #8:
+            begin
+                Delete(stringModificable,Length(stringModificable),1);
+                leerSoloNumeros := borrar;
+            end;
+            #13: leerSoloNumeros := enter;
+            #27: leerSoloNumeros := escape;
+        end;
+    end;
+
+    procedure escribirEnVentana(ventana : infoVentana; input : String);
+    var
+        tempString : String;
+        i : Word;
+    begin
+        GotoXY(ventana.cursor.x, ventana.cursor.y);
+        tempString := '';
+        for i := 1 to ((ventana.bottomRight.x - ventana.topLeft.x) - 4) do
+            tempString := tempString + ' ';
+        Write(tempString);
+        GotoXY(ventana.cursor.x, ventana.cursor.y);
+        Write(input);
     end;
 
     function dimensionesDeTerminal : Vector2;
@@ -136,40 +216,36 @@ implementation
         end;
     end;
 
-    function dibujarVentana(titulo : String; ancho : Word; alto : Word) : infoVentana;
+    function dibujarVentana(titulo : String; anchoMinimo : Word; altoMinimo : Word) : infoVentana;
     var
         middle, topLeft, bottomRight : Vector2;
         dimensionesValidas : Boolean;
     begin
         bottomRight := dimensionesDeTerminal;
 
-        {Verificacion de ancho y alto adecuado}
-        if (ancho > (bottomRight.x - 42)) and (alto > (bottomRight.y - 8)) then
+        if (anchoMinimo > (bottomRight.x - 42)) and (altoMinimo > (bottomRight.y - 8)) then
             dimensionesValidas := false
         else
             dimensionesValidas := true;
 
         if not dimensionesValidas then
         begin
-            {Cero detectador de atrevidos}
             dibujarVentana.topLeft.x := 0;
         end
         else
         begin
-            {Calculo de esquinas de ventana}
             middle.x := bottomRight.x div 2;
             middle.y := bottomRight.y div 2;
 
-            topLeft.x := middle.x - ancho div 2;
-            topLeft.y := middle.y - alto div 2;
-            bottomRight.x := middle.x + ancho div 2;
-            if (alto mod 2 = 1) then
-                bottomRight.y := middle.y + alto div 2
+            topLeft.x := middle.x - anchoMinimo div 2;
+            topLeft.y := middle.y - altoMinimo div 2;
+            bottomRight.x := middle.x + anchoMinimo div 2;
+            if (altoMinimo mod 2 = 1) then
+                bottomRight.y := middle.y + altoMinimo div 2
             else
-                bottomRight.y := (middle.y + alto div 2) - 1;
+                bottomRight.y := (middle.y + altoMinimo div 2) - 1;
 
 
-            {Dibujado(? de ventana}
             TextColor(Blue);
             dibujarCaja(topLeft,bottomRight);
             GotoXY(middle.x - (Length(titulo) div 2), topLeft.y + 2);
@@ -177,16 +253,17 @@ implementation
             Write(titulo);
             TextColor(White);
 
-            {Retorno de esquinas de ventana}
             dibujarVentana.topLeft := topLeft;
             dibujarVentana.bottomRight := bottomRight;
+            dibujarVentana.cursor.x := topLeft.x + 2;
+            dibujarVentana.cursor.y := topLeft.y + 4;
         end;
     end;
     
     procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer);
     var
         windowInfo : infoVentana;
-        keyPressed : tecla;
+        teclaPresionada : tecla;
         prefix : String[2];
         i : Integer;
         width, alto : Word;
@@ -246,9 +323,9 @@ implementation
                     TextBackground(Black);
                     TextColor(White);
 
-                    keyPressed := leerTecla;
+                    teclaPresionada := leerTecla;
 
-                    case keyPressed of
+                    case teclaPresionada of
                         arriba: 
                             if seleccion > 1 then 
                                 seleccion := seleccion - 1 
@@ -262,21 +339,21 @@ implementation
                         escape:
                             begin
                                 seleccion := -1; 
-                                keyPressed := enter;
+                                teclaPresionada := enter;
                             end;
                     end;
-                until keyPressed = enter;
+                until teclaPresionada = enter;
             end;
         end;
     end;
 
-    procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer);
+    procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer; anchoMinimo : Word; altoMinimo : Word);
     var
         windowInfo : infoVentana;
-        keyPressed : tecla;
+        teclaPresionada : tecla;
         prefix : String[2];
         i : Integer;
-        width, alto, anchoTotalOpciones, espacioEntreOpciones : Word;
+        width, height, anchoTotalOpciones, espacioEntreOpciones : Word;
         startX : Integer;
     begin
         if menuData.cantidad > 0 then
@@ -300,22 +377,21 @@ implementation
 
             anchoTotalOpciones := anchoTotalOpciones + (espacioEntreOpciones * (menuData.cantidad - 1));
 
-            width := Length(titulo);
-            for i := 1 to menuData.cantidad do
-            begin
-                if Length(menuData.opciones[i]) > width then
-                    width := Length(menuData.opciones[i]);
-            end;
-
+            width := anchoMinimo;
+            if width < Length(titulo) then
+                width := Length(titulo);
+            
             if anchoTotalOpciones + 6 > width then
                 width := anchoTotalOpciones + 6
             else
                 width := width + 10;
 
-            alto := 7;
+            height := altoMinimo;
+            if height < 7 then
+                height := 7;
             ///////////////////////////////////////////////////////////////////////////////////
 
-            windowInfo := dibujarVentana(titulo, width, alto);
+            windowInfo := dibujarVentana(titulo, width, height);
 
             if windowInfo.topLeft.x = 0 then
             begin
@@ -352,9 +428,9 @@ implementation
                     TextBackground(Black);
                     TextColor(White);
 
-                    keyPressed := leerTecla;
+                    teclaPresionada := leerTecla;
 
-                    case keyPressed of
+                    case teclaPresionada of
                         izquierda: 
                             if seleccion > 1 then 
                                 seleccion := seleccion - 1 
@@ -368,10 +444,10 @@ implementation
                         escape:
                             begin
                                 seleccion := -1; 
-                                keyPressed := enter;
+                                teclaPresionada := enter;
                             end;
                     end;
-                until keyPressed = enter;
+                until teclaPresionada = enter;
             end;
         end;
     end;

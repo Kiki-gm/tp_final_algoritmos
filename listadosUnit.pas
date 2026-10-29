@@ -1,5 +1,8 @@
 unit listadosUnit;
 
+interface
+uses archivoPolizasUnit, archivoClientesUnit, clientesUnit, polizasUnit;
+
 const //Placeholder.
     n = 5;
 
@@ -7,11 +10,8 @@ type //Placeholder. Modificar según sea necesario.
     tDatoLista = Integer;
     tLista = record
         elem : array[1..n] OF tDatoLista;
-        tam : 1..n;
+        tam : byte;
     end;
-
-interface
-uses archivoPolizasUnit, archivoClientesUnit, clientesUnit, polizasUnit;
 
 procedure listaCrear(var l : tLista);
 procedure listaAdd(var l : tLista; x: tDatoLista); //La Ñ no es nativamente interpretada en todos los entornos de Pascal, por lo que se opta por una alternativa.
@@ -31,16 +31,16 @@ implementation
 
         procedure listaCrear(var l : tLista);
     begin
-        l.size := 0;
+        l.tam := 0;
     end;
 
     procedure listaAdd(var l : tLista; x: tDatoLista);
     begin
-        inc(l.size);
-        l.elem[l.size] := x;
+        inc(l.tam);
+        l.elem[l.tam] := x;
     end;
 
-    procedure (var l : tLista;pos : byte; x : tDatoLista);
+    procedure listaRecuperar(var l : tLista;pos : byte; x : tDatoLista);
     begin
         x := l.elem[pos];
     end;
@@ -52,22 +52,24 @@ implementation
 
     function listaLlena(var l: tLista): boolean;
     begin
-        listaLlena := l.size = N;
+        listaLlena := l.tam = N;
     end;
 
     function listaVacia(var l: tLista): boolean;
     begin
-        listaVacia := l.size = N;
+        listaVacia := l.tam = N;
     end;
 
-    function listasize(var l: tLista): byte;
+    function listaSize(var l: tLista):byte;
     begin
-        listasize := lsize;
+        listaSize := l.tam;
     end;
 
     procedure listaOrdenar(var l : tLista; pos : byte);
+    var 
+        i : 1..n;
     begin
-        for i := pos to listasize(l)-1 do
+        for i := pos to listaSize(l)-1 do
         begin
             l.elem[i] := l.elem[i+1];  
         end;
@@ -78,12 +80,12 @@ implementation
 
         x := l.elem[pos];
 
-        if pos <> listasize[l] then
+        if pos <> listaSize(l) then
         begin
             listaOrdenar(l, pos);  
         end;
 
-        dec(l.size);
+        dec(l.tam);
 
     end;
 
@@ -93,13 +95,12 @@ implementation
         temp1, temp2 : tDatoLista;
 
     begin
-
-        for i := 1 to listasize(l)-1 do
+        for i := 1 to listaSize(l)-1 do
         begin
-            for j := 1 to listasize(l)-i do
+            for j := 1 to listaSize(l)-i do
             begin
-                listrecover(l,j,temp1);
-                listrecover(l,j+1,temp2);
+                listaRecuperar(l,j,temp1);
+                listaRecuperar(l,j+1,temp2);
 
                 if temp1 > temp2 then
                 begin
@@ -115,9 +116,9 @@ implementation
         i : byte;
         x : tDatoLista;
     begin
-        for i := 1 to listasize(l) do
+        for i := 1 to listaSize(l) do
         begin
-            (l,i,x);
+            listaRecuperar(l,i,x);
             Writeln(x);
         end;
     end;

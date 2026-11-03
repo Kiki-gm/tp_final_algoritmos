@@ -11,6 +11,7 @@ interface
     function integerToString(input : Integer): String;
     function completarCeros(dni : tDNI) : tDNI;
     function esDNI(dni : tDNI) : Boolean;
+    function suprimirEspacios(fullName: String): String;
 
 implementation
 
@@ -114,4 +115,15 @@ implementation
         esDNI := (Length(dni) >= 7) or (Length(dni) <= 8);
     end;
 
+    function suprimirEspacios(fullName: String): String;
+    var
+        i : Cardinal;
+    begin
+        simplename := fullname;
+        for i := 1 to SizeOf(fullname) do
+        begin
+            if fullname[i] = ' ' then
+                delete(simplename,i,1);
+        end;
+    end;
 end.

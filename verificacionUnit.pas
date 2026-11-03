@@ -1,6 +1,7 @@
 unit verificacionUnit;
 
 interface
+uses tiposUnit;
 
 function esNumero(input : String): Boolean;
 function enRango(input : String; min : Real; max : Real): Boolean;
@@ -8,6 +9,7 @@ function stringToReal(input : String): Real;
 function realToString(input : Real): String;
 function stringToInteger(input : String): Integer;
 function integerToString(input : Integer): String;
+function esDNI(var dni : tDNI):Boolean;
 
 implementation
 
@@ -94,6 +96,21 @@ implementation
     function integerToString(input : Integer): String;
     begin
         Str(input, integerToString);
+    end;
+
+    function esDNI(var dni : tDNI):Boolean;
+    var
+        i : cardinal;
+    begin
+        for i := 1 to length(dni) do
+        begin
+            if (ord(dni[i]) < 48) or (ord(dni[i]) > 57) then
+            begin
+                esDNI := false; 
+            end 
+            else
+                esDNI := True;  
+        end;    
     end;
 
 end.

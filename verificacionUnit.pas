@@ -1,7 +1,7 @@
 unit verificacionUnit;
 
 interface
-    uses tiposUnit;
+    uses tiposUnit, crt;
 
     function esNumero(input : String): Boolean;
     function enRango(input : String; min : Real; max : Real): Boolean;
@@ -118,12 +118,19 @@ implementation
     function suprimirEspacios(fullName: String): String;
     var
         i : Cardinal;
+        temp : String;
     begin
-        simplename := fullname;
+        temp := fullname;
+
+        if temp[1] = ' ' then
+            delete(temp,1,1);
+
         for i := 1 to SizeOf(fullname) do
         begin
-            if fullname[i] = ' ' then
-                delete(simplename,i,1);
+            if temp[i] = ' ' then
+                delete(temp,i,1);
         end;
+
+        suprimirEspacios := temp;
     end;
 end.

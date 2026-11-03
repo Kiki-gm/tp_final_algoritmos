@@ -11,13 +11,13 @@ interface
     procedure escribirArchivoClientes(var f : tArchivoClientes; pos : Cardinal; data : datosCliente);
     function ultimaLineaArchivoClientes(var f : tArchivoClientes): Integer;    
     
-    function busquedaBinariaDNI(var arch: tArchivoClientes; searched: tDNI): Integer;
     function buscarDatosCliente(var arch: tArchivoClientes; i : Word): datosCliente;
     procedure inicializarCliente(var c : datosCliente; d : tDNI);
     procedure agregarCliente(var f : tArchivoClientes; c : datosCliente); 
     
-    function busquedaBinariaDNI(var arch: tArchivoClientes; searched: tDNI): Word;
+    function busquedaBinariaDNI(var arch: tArchivoClientes; searched: tDNI): Integer;
     procedure quicksortApellidoNombre(var arch: tArchivoClientes; first: Word; last: Word);
+
 
 
 implementation
@@ -123,7 +123,7 @@ implementation
         lower := first;
         upper := last;
 
-        if ultimaLinea(arch) >= 0 then
+        if ultimaLineaArchivoClientes(arch) >= 0 then
         begin
             leerArchivoClientes(arch, (lower + upper) div 2, pivot);
 

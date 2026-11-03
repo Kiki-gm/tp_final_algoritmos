@@ -4,3 +4,4 @@ test.pas
 *.ppu
 *.o
 *.exe
+*.dat

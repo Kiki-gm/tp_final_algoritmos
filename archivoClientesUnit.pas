@@ -6,19 +6,21 @@ interface
     type
         tArchivoClientes = file of datosCliente;
 
-    procedure InicializarArchivoClientes(var f : tArchivoClientes; path : String);
-    procedure LeerArchivoClientes(var f : tArchivoClientes; pos : Cardinal; var data : datosCliente);
-    procedure EscribirArchivoClientes(var f : tArchivoClientes; pos : Cardinal; data : datosCliente);
-    function UltimaLinea(var f : tArchivoClientes): Integer;    
+    procedure inicializarArchivoClientes(var f : tArchivoClientes; path : String);
+    procedure leerArchivoClientes(var f : tArchivoClientes; pos : Cardinal; var data : datosCliente);
+    procedure escribirArchivoClientes(var f : tArchivoClientes; pos : Cardinal; data : datosCliente);
+    function ultimaLinea(var f : tArchivoClientes): Integer;    
     
     function busquedaBinariaDNI(var arch: tArchivoClientes; searched: tDNI): Integer;
     function buscarDatosCliente(var arch: tArchivoClientes; i : Word): datosCliente;
     function completarCeros(dni : tDNI) : tDNI;
+    procedure inicializarCliente(var c : datosCliente; d : tDNI);
+    procedure agregarCliente(var f : tArchivoClientes; c : datosCliente);
 
 
 implementation
 
-    procedure InicializarArchivoClientes(var f : tArchivoClientes; path : String);
+    procedure inicializarArchivoClientes(var f : tArchivoClientes; path : String);
     begin
         Assign(f, path);
         {$i-}
@@ -34,21 +36,27 @@ implementation
         end;
     end;
 
-    procedure LeerArchivoClientes(var f : tArchivoClientes; pos : Cardinal; var data : datosCliente);
+    procedure leerArchivoClientes(var f : tArchivoClientes; pos : Cardinal; var data : datosCliente);
     begin
         Seek(f,pos);
         Read(f,data);
     end;
 
-    procedure EscribirArchivoClientes(var f : tArchivoClientes; pos : Cardinal; data : datosCliente);
+    procedure escribirArchivoClientes(var f : tArchivoClientes; pos : Cardinal; data : datosCliente);
     begin
         Seek(f,pos);
         Write(f,data);
     end;
-    
-    function UltimaLinea(var f : tArchivoClientes): Integer;
+
+    procedure agregarCliente(var f : tArchivoClientes; c : datosCliente);
     begin
-        UltimaLinea := FileSize(f) - 1;
+        Seek(f, FileSize(f));
+        Write(f,c);
+    end;
+    
+    function ultimaLinea(var f : tArchivoClientes): Integer;
+    begin
+        ultimaLinea := FileSize(f) - 1;
     end;
 
     function ArchivoVacio(var f : tArchivoClientes): Boolean;
@@ -66,12 +74,12 @@ implementation
         if not ArchivoVacio(arch) then
         begin
             ini := 0;
-            fin := UltimaLinea(arch);
+            fin := ultimaLinea(arch);
 
             while (ini <= fin) and (pos = -1) do
             begin
                 mid := (ini + fin) div 2;
-                LeerArchivoClientes(arch, mid, temp);
+                leerArchivoClientes(arch, mid, temp);
 
                 if searched = temp.DNI then
                     pos := mid
@@ -97,8 +105,23 @@ implementation
     begin
         s := dni;
         while Length(s) < 8 do
-            s := '0' + s;
+        begin
+            s := Concat('0', s);
+        end;
         completarCeros := s;
+    end;
+
+    procedure inicializarCliente(var c : datosCliente; d : tDNI);
+    begin
+        c.dni := d;
+        c.apellidoYNombres := '';
+        c.direccion := '';
+        c.fechaDeNacimiento.D := 1;
+        c.fechaDeNacimiento.M := 1;
+        c.fechaDeNacimiento.A := 2000;
+        c.celular := '';
+        c.email := '';
+        c.estado := true;
     end;
 
 end.

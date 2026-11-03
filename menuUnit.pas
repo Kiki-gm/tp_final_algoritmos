@@ -124,7 +124,7 @@ implementation
         begin
             ClrScr;
             dibujarEscape(false);
-            ventanaDatos := dibujarVentana('Modificacion de Cliente', 55, 13);
+            ventanaDatos := dibujarVentana('Modificacion de Cliente', 55, 13, 0, 0);
             
             if ventanaDatos.topLeft.x <> 0 then
             begin
@@ -152,7 +152,7 @@ implementation
                                 if actualizando and (i = sel) then 
                                 begin
                                     TextColor(White);
-                                    Write(tempString, '_');
+                                    Write(tempString, '_ ');
                                     TextColor(Cyan); 
                                 end 
                                 else 
@@ -163,7 +163,7 @@ implementation
                                 if actualizando and (i = sel) then 
                                 begin
                                     TextColor(White);
-                                    Write(tempString, '_');
+                                    Write(tempString, '_ ');
                                     TextColor(Cyan);
                                 end 
                                 else 
@@ -182,7 +182,7 @@ implementation
                                 if actualizando and (i = sel) then 
                                 begin
                                     TextColor(White);
-                                    Write(tempString, '_');
+                                    Write(tempString, '_ ');
                                     TextColor(Cyan);
                                 end 
                                 else 
@@ -193,7 +193,7 @@ implementation
                                 if actualizando and (i = sel) then 
                                 begin
                                     TextColor(White);
-                                    Write(tempString, '_');
+                                    Write(tempString, '_ ');
                                     TextColor(Cyan);
                                 end 
                                 else 
@@ -275,7 +275,7 @@ implementation
                                 
                                 if cliente.estado then
                                 begin
-                                    menuHorizontal('Esta seguro que desea dar de baja?', menuConfirmacion, seleccionConfirmacion, 30, 7);
+                                    menuHorizontal('Esta seguro que desea dar de baja?', menuConfirmacion, seleccionConfirmacion, 30, 7, 0, 20);
                                     if seleccionConfirmacion = 1 then
                                     begin
                                         cliente.estado := not cliente.estado; 
@@ -311,7 +311,7 @@ implementation
             begin
                 temp := temp + '.';
             end;
-            dibujarVentana('Saliendo' + temp, 15, 5);
+            dibujarVentana('Saliendo' + temp, 15, 5, 0, 0);
             GotoXY(dimensionesDeTerminal.x, dimensionesDeTerminal.y);
             Delay(1000);
         end;
@@ -332,7 +332,7 @@ implementation
         tempString := '';
         stop := false;
         dibujarEscape(false);
-        ventanaActual := dibujarVentana('Gestion de clientes', 24, 7);
+        ventanaActual := dibujarVentana('Gestion de clientes', 24, 7, 0, 0);
         repeat
             escribirEnVentana(ventanaActual, 'DNI: ' + tempString);
             
@@ -357,7 +357,7 @@ implementation
                 agregarOpcion(menuActual, 'Registrar');
                 agregarOpcion(menuActual, 'Salir');
                 seleccionActual := 1;
-                menuHorizontal('El DNI ' + tempString  + ' no esta registrado', menuActual, seleccionActual, 30, 7);
+                menuHorizontal('El DNI ' + tempString  + ' no esta registrado', menuActual, seleccionActual, 30, 7, 0, 0);
 
                 if seleccionActual = 1 then
                 begin
@@ -406,7 +406,7 @@ implementation
 
         repeat
             seleccion := 1;
-            menuVertical('Menu principal', menuPrincipal, seleccion);
+            menuVertical('Menu principal', menuPrincipal, seleccion, 0, 0);
 
             case seleccion of 
                 -1: salirDelPrograma(archivoClientes);

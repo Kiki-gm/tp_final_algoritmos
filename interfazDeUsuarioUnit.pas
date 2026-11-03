@@ -35,9 +35,9 @@ function dimensionesDeTerminal : Vector2;
 procedure dibujarCaja(esquinaSuperiorIzquierda : Vector2; esquinaInferiorDerecha : Vector2);
 procedure dibujarEscape(salir : Boolean);
 procedure escribirEnVentana(ventana : infoVentana; input : String);
-function dibujarVentana(titulo : String; anchoMinimo : Word; altoMinimo : Word) : infoVentana;
-procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer);
-procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer; anchoMinimo : Word; altoMinimo : Word);
+function dibujarVentana(titulo : String; anchoMinimo : Word; altoMinimo : Word; desplazamientoX : Integer; desplazamientoY : Integer) : infoVentana;
+procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer; desplazamientoX : Integer; desplazamientoY : Integer);
+procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer; anchoMinimo : Word; altoMinimo : Word; desplazamientoX : Integer; desplazamientoY : Integer);
 function adentroDeVentanaActual(coordenadas : Vector2; windowInfo : infoVentana) : Boolean;
 procedure inicializarMenu(var menuData : registroMenu);
 procedure agregarOpcion(var menuData : registroMenu; opcion : String);
@@ -216,7 +216,7 @@ implementation
         end;
     end;
 
-    function dibujarVentana(titulo : String; anchoMinimo : Word; altoMinimo : Word) : infoVentana;
+    function dibujarVentana(titulo : String; anchoMinimo : Word; altoMinimo : Word; desplazamientoX : Integer; desplazamientoY : Integer) : infoVentana;
     var
         middle, topLeft, bottomRight : Vector2;
         dimensionesValidas : Boolean;
@@ -234,8 +234,8 @@ implementation
         end
         else
         begin
-            middle.x := bottomRight.x div 2;
-            middle.y := bottomRight.y div 2;
+            middle.x := (bottomRight.x div 2) + desplazamientoX;
+            middle.y := (bottomRight.y div 2) + desplazamientoY;
 
             topLeft.x := middle.x - anchoMinimo div 2;
             topLeft.y := middle.y - altoMinimo div 2;
@@ -260,18 +260,16 @@ implementation
         end;
     end;
     
-    procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer);
+    procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer; desplazamientoX : Integer; desplazamientoY : Integer);
     var
         windowInfo : infoVentana;
         teclaPresionada : tecla;
         prefix : String[2];
         i : Integer;
-        width, alto : Word;
+        width, height : Word;
     begin
         if menuData.cantidad > 0 then
         begin
-            ClrScr;
-
             if titulo = 'Menu principal' then
                 dibujarEscape(true)
             else
@@ -286,10 +284,10 @@ implementation
                     width := Length(menuData.opciones[i]);
             end;
             width := width + 10;
-            alto := menuData.cantidad + 6;
+            height := menuData.cantidad + 6;
             ///////////////////////////////////////////////////////////////////////////////////
 
-            windowInfo := dibujarVentana(titulo, width, alto);
+            windowInfo := dibujarVentana(titulo, width, height, desplazamientoX, desplazamientoY);
 
             if windowInfo.topLeft.x = 0 then
             begin
@@ -347,7 +345,7 @@ implementation
         end;
     end;
 
-    procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer; anchoMinimo : Word; altoMinimo : Word);
+    procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer; anchoMinimo : Word; altoMinimo : Word; desplazamientoX : Integer; desplazamientoY : Integer);
     var
         windowInfo : infoVentana;
         teclaPresionada : tecla;
@@ -358,8 +356,6 @@ implementation
     begin
         if menuData.cantidad > 0 then
         begin
-            ClrScr;
-
             if titulo = 'Menu principal' then
                 dibujarEscape(true)
             else
@@ -391,7 +387,7 @@ implementation
                 height := 7;
             ///////////////////////////////////////////////////////////////////////////////////
 
-            windowInfo := dibujarVentana(titulo, width, height);
+            windowInfo := dibujarVentana(titulo, width, height, desplazamientoX, desplazamientoY);
 
             if windowInfo.topLeft.x = 0 then
             begin

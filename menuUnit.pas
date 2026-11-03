@@ -122,9 +122,8 @@ implementation
         var
             i : Integer; 
         begin
-            ClrScr;
             dibujarEscape(false);
-            ventanaDatos := dibujarVentana('Modificacion de Cliente', 55, 13, 0, 0);
+            ventanaDatos := dibujarVentana('Datos de Cliente con DNI: ' + cliente.DNI, 55, 13, 0, 0);
             
             if ventanaDatos.topLeft.x <> 0 then
             begin
@@ -226,6 +225,11 @@ implementation
         salirMenu := false;
         
         repeat
+            if seleccionConfirmacion <> 1 then
+                ClrScr;
+            
+            seleccionConfirmacion := 0;
+
             dibujarFormulario(seleccion, false);
             teclaPresionada := leerTecla;
             
@@ -274,18 +278,15 @@ implementation
                                 seleccionConfirmacion := 1;
                                 
                                 if cliente.estado then
-                                begin
-                                    menuHorizontal('Esta seguro que desea dar de baja?', menuConfirmacion, seleccionConfirmacion, 30, 7, 0, 20);
-                                    if seleccionConfirmacion = 1 then
-                                    begin
-                                        cliente.estado := not cliente.estado; 
-                                        EscribirArchivoClientes(f, indiceRegistro, cliente);
-                                    end;
-                                end
+                                    menuHorizontal('Esta seguro que desea dar de baja?', menuConfirmacion, seleccionConfirmacion, 30, 7, 0, 11)
                                 else
+                                    menuHorizontal('Esta seguro que desea dar de alta?', menuConfirmacion, seleccionConfirmacion, 30, 7, 0, 11);
+                            
+                                if seleccionConfirmacion = 1 then
                                 begin
                                     cliente.estado := not cliente.estado; 
                                     EscribirArchivoClientes(f, indiceRegistro, cliente);
+                                    ClrScr;
                                 end;
                             end;
                         end;
@@ -341,7 +342,7 @@ implementation
             if teclaPresionada = escape then
                 stop := true;
                 
-            if (teclaPresionada = enter) and (Length(tempString) >= 7) and (Length(tempString) <= 8) then
+            if (teclaPresionada = enter) and esDNI(tempString) then
                 stop := true;  
         until stop;
         
@@ -353,6 +354,7 @@ implementation
 
             if indiceBusquedaBinaria = -1 then
             begin
+                ClrScr;
                 inicializarMenu(menuActual);
                 agregarOpcion(menuActual, 'Registrar');
                 agregarOpcion(menuActual, 'Salir');
@@ -361,7 +363,9 @@ implementation
 
                 if seleccionActual = 1 then
                 begin
-                    // Registrar usuario
+                    inicializarCliente(cliente, tempString);
+                    AgregarCliente(f, cliente);
+                    menuModificacionCliente(f, ultimaLineaArchivoClientes(f), cliente);
                 end;
             end
             else
@@ -374,17 +378,17 @@ implementation
 
     procedure gestionDePolizas;
     begin
-      
+        
     end;
 
     procedure listado;
     begin
-      
+        
     end;
 
     procedure estadisticas; 
     begin
-      
+        
     end;
 
     procedure menuPrincipal;
@@ -392,7 +396,6 @@ implementation
         menuPrincipal : registroMenu;
         seleccion : Integer;
         archivoClientes : tArchivoClientes;
-
     begin
         InicializarArchivoClientes(archivoClientes, 'clientes.dat');
 
@@ -405,6 +408,7 @@ implementation
         seleccion := 1;
 
         repeat
+            ClrScr;
             seleccion := 1;
             menuVertical('Menu principal', menuPrincipal, seleccion, 0, 0);
 
@@ -418,4 +422,5 @@ implementation
 
         until seleccion = -1;
     end;
+
 end.

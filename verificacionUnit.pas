@@ -1,19 +1,20 @@
 unit verificacionUnit;
 
 interface
-uses tiposUnit;
+    uses tiposUnit, crt;
 
-function esNumero(input : String): Boolean;
-function enRango(input : String; min : Real; max : Real): Boolean;
-function stringToReal(input : String): Real;
-function realToString(input : Real): String;
-function stringToInteger(input : String): Integer;
-function integerToString(input : Integer): String;
-function esDNI(var dni : tDNI):Boolean;
+    function esNumero(input : String): Boolean;
+    function enRango(input : String; min : Real; max : Real): Boolean;
+    function stringToReal(input : String): Real;
+    function realToString(input : Real): String;
+    function stringToInteger(input : String): Integer;
+    function integerToString(input : Integer): String;
+    function completarCeros(dni : tDNI) : tDNI;
+    function esDNI(dni : tDNI) : Boolean;
+    function suprimirEspacios(fullName: String): String;
 
 implementation
 
-    {Si queres entender este codigo investiga como funciona Val(), una funcion de pascal}
     function esNumero(input : String): Boolean;
     var
         code : Integer;
@@ -87,7 +88,6 @@ implementation
         end;
     end;
 
-    {Si queres entender este codigo investiga como funciona Str(), una funcion de pascal}
     function realToString(input : Real): String;
     begin
         Str(input, realToString);
@@ -98,19 +98,39 @@ implementation
         Str(input, integerToString);
     end;
 
-    function esDNI(var dni : tDNI):Boolean;
+    function completarCeros(dni : tDNI) : tDNI;
     var
-        i : cardinal;
+        s : tDNI;
     begin
-        for i := 1 to length(dni) do
+        s := dni;
+        while Length(s) < 8 do
         begin
-            if (ord(dni[i]) < 48) or (ord(dni[i]) > 57) then
-            begin
-                esDNI := false; 
-            end 
-            else
-                esDNI := True;  
-        end;    
+            s := Concat('0', s);
+        end;
+        completarCeros := s;
     end;
 
+    function esDNI(dni : tDNI) : Boolean;
+    begin
+        esDNI := (Length(dni) >= 7) or (Length(dni) <= 8);
+    end;
+
+    function suprimirEspacios(fullName: String): String;
+    var
+        i : Cardinal;
+        temp : String;
+    begin
+        temp := fullname;
+
+        if temp[1] = ' ' then
+            delete(temp,1,1);
+
+        for i := 1 to SizeOf(fullname) do
+        begin
+            if temp[i] = ' ' then
+                delete(temp,i,1);
+        end;
+
+        suprimirEspacios := temp;
+    end;
 end.

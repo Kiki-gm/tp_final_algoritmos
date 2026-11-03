@@ -9,11 +9,10 @@ interface
     procedure inicializarArchivoClientes(var f : tArchivoClientes; path : String);
     procedure leerArchivoClientes(var f : tArchivoClientes; pos : Cardinal; var data : datosCliente);
     procedure escribirArchivoClientes(var f : tArchivoClientes; pos : Cardinal; data : datosCliente);
-    function ultimaLinea(var f : tArchivoClientes): Integer;    
+    function ultimaLineaArchivoClientes(var f : tArchivoClientes): Integer;    
     
     function busquedaBinariaDNI(var arch: tArchivoClientes; searched: tDNI): Integer;
     function buscarDatosCliente(var arch: tArchivoClientes; i : Word): datosCliente;
-    function completarCeros(dni : tDNI) : tDNI;
     procedure inicializarCliente(var c : datosCliente; d : tDNI);
     procedure agregarCliente(var f : tArchivoClientes; c : datosCliente);
 
@@ -54,9 +53,9 @@ implementation
         Write(f,c);
     end;
     
-    function ultimaLinea(var f : tArchivoClientes): Integer;
+    function ultimaLineaArchivoClientes(var f : tArchivoClientes): Integer;
     begin
-        ultimaLinea := FileSize(f) - 1;
+        ultimaLineaArchivoClientes := FileSize(f) - 1;
     end;
 
     function ArchivoVacio(var f : tArchivoClientes): Boolean;
@@ -74,7 +73,7 @@ implementation
         if not ArchivoVacio(arch) then
         begin
             ini := 0;
-            fin := ultimaLinea(arch);
+            fin := ultimaLineaArchivoClientes(arch);
 
             while (ini <= fin) and (pos = -1) do
             begin
@@ -97,18 +96,6 @@ implementation
     begin
         Seek(arch,i);
         Read(arch,buscarDatosCliente);
-    end;
-
-    function completarCeros(dni : tDNI) : tDNI;
-    var
-        s : tDNI;
-    begin
-        s := dni;
-        while Length(s) < 8 do
-        begin
-            s := Concat('0', s);
-        end;
-        completarCeros := s;
     end;
 
     procedure inicializarCliente(var c : datosCliente; d : tDNI);

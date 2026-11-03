@@ -6,16 +6,16 @@ interface
     type
         tArchivoPolizas = file of datosPoliza;
 
-    procedure InicializarArchivoPolizas(var f : tArchivoPolizas; path : String);
-    procedure LeerArchivoPolizas(var f : tArchivoPolizas; pos : Cardinal; var data : datosPoliza);
-    procedure EscribirArchivoPolizas(var f : tArchivoPolizas; pos : Cardinal; data : datosPoliza);
-    function UltimaLinea(var f : tArchivoPolizas): Integer;    
+    procedure inicializarArchivoPolizas(var f : tArchivoPolizas; path : String);
+    procedure leerArchivoPolizas(var f : tArchivoPolizas; pos : Cardinal; var data : datosPoliza);
+    procedure escribirArchivoPolizas(var f : tArchivoPolizas; pos : Cardinal; data : datosPoliza);
+    function ultimaLineaArchivoPolizas(var f : tArchivoPolizas): Integer;    
 
 
 
 implementation
 
-    procedure InicializarArchivoPolizas(var f : tArchivoPolizas; path : String);
+    procedure inicializarArchivoPolizas(var f : tArchivoPolizas; path : String);
     begin
         Assign (f,path);
         {$i-}
@@ -25,7 +25,7 @@ implementation
             Rewrite(f);
     end;
 
-    procedure LeerArchivoPolizas(var f : tArchivoPolizas; pos : Cardinal; var data : datosPoliza);
+    procedure leerArchivoPolizas(var f : tArchivoPolizas; pos : Cardinal; var data : datosPoliza);
     var
         lastPos : Cardinal;
     begin
@@ -35,7 +35,7 @@ implementation
         Seek(f, lastPos);
     end;
 
-    procedure EscribirArchivoPolizas(var f : tArchivoPolizas; pos : Cardinal; data : datosPoliza);
+    procedure escribirArchivoPolizas(var f : tArchivoPolizas; pos : Cardinal; data : datosPoliza);
     var
         lastPos : Cardinal;
     begin
@@ -45,9 +45,9 @@ implementation
         Seek(f, lastPos);
     end;
     
-    function UltimaLinea(var f : tArchivoPolizas): Integer;
+    function ultimaLineaArchivoPolizas(var f : tArchivoPolizas): Integer;
     begin
-        UltimaLinea := FileSize(f) - 1;
+        ultimaLineaArchivoPolizas := FileSize(f) - 1;
     end;
 
 end.

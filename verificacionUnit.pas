@@ -1,17 +1,19 @@
 unit verificacionUnit;
 
 interface
+    uses tiposUnit;
 
-function esNumero(input : String): Boolean;
-function enRango(input : String; min : Real; max : Real): Boolean;
-function stringToReal(input : String): Real;
-function realToString(input : Real): String;
-function stringToInteger(input : String): Integer;
-function integerToString(input : Integer): String;
+    function esNumero(input : String): Boolean;
+    function enRango(input : String; min : Real; max : Real): Boolean;
+    function stringToReal(input : String): Real;
+    function realToString(input : Real): String;
+    function stringToInteger(input : String): Integer;
+    function integerToString(input : Integer): String;
+    function completarCeros(dni : tDNI) : tDNI;
+    function esDNI(dni : tDNI) : Boolean;
 
 implementation
 
-    {Si queres entender este codigo investiga como funciona Val(), una funcion de pascal}
     function esNumero(input : String): Boolean;
     var
         code : Integer;
@@ -85,7 +87,6 @@ implementation
         end;
     end;
 
-    {Si queres entender este codigo investiga como funciona Str(), una funcion de pascal}
     function realToString(input : Real): String;
     begin
         Str(input, realToString);
@@ -94,6 +95,23 @@ implementation
     function integerToString(input : Integer): String;
     begin
         Str(input, integerToString);
+    end;
+
+    function completarCeros(dni : tDNI) : tDNI;
+    var
+        s : tDNI;
+    begin
+        s := dni;
+        while Length(s) < 8 do
+        begin
+            s := Concat('0', s);
+        end;
+        completarCeros := s;
+    end;
+
+    function esDNI(dni : tDNI) : Boolean;
+    begin
+        esDNI := (Length(dni) >= 7) or (Length(dni) <= 8);
     end;
 
 end.

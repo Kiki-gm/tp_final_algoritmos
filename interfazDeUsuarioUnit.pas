@@ -7,10 +7,10 @@ interface
 uses crt;
 
 const
-    MAX_OPCIONES = 64;
+    maxOpciones = 64;
 
 type
-    tecla = (arriba, abajo, escape, enter, desconocido);
+    tecla = (arriba, abajo, izquierda, derecha, escape, enter, desconocido);
 
     Vector2 = record
         x : Word;
@@ -23,7 +23,7 @@ type
     end;
 
     registroMenu = record
-        opciones : array[1..MAX_OPCIONES] of String;
+        opciones : array[1..maxOpciones] of String;
         cantidad : Integer;
     end;
 
@@ -32,7 +32,8 @@ function dimensionesDeTerminal : Vector2;
 procedure dibujarCaja(esquinaSuperiorIzquierda : Vector2; esquinaInferiorDerecha : Vector2);
 procedure dibujarEscape(salir : Boolean);
 function dibujarVentana(titulo : String; ancho : Word; alto : Word) : infoVentana;
-procedure menu(titulo : String; var menuData : registroMenu; var seleccion : Integer);
+procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer);
+procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer);
 function adentroDeVentanaActual(coordenadas : Vector2; windowInfo : infoVentana) : Boolean;
 procedure inicializarMenu(var menuData : registroMenu);
 procedure agregarOpcion(var menuData : registroMenu; opcion : String);
@@ -57,14 +58,24 @@ implementation
                 begin
                     ch := ReadKey;
                     case ch of
-                        #72, #87: // La flecha para arriba y la flecha para arriba + shift por si acaso
+                        #72:
                         begin
                             leerTecla := arriba;
                             keyDetected := true;
                         end;
-                        #80, #83: // Lo mismo que arriba pero con la flecha para abajo
+                        #80:
                         begin
                             leerTecla := abajo;
+                            keyDetected := true;
+                        end;
+                        #75:
+                        begin
+                            leerTecla := izquierda;
+                            keyDetected := true;
+                        end;
+                        #77:
+                        begin
+                            leerTecla := derecha;
                             keyDetected := true;
                         end;
                     end;
@@ -87,6 +98,16 @@ implementation
                 'S', 's':
                 begin
                     leerTecla := abajo;
+                    keyDetected := true;
+                end;
+                'A', 'a':
+                begin
+                    leerTecla := izquierda;
+                    keyDetected := true;
+                end;
+                'D', 'd':
+                begin
+                    leerTecla := derecha;
                     keyDetected := true;
                 end;
             end;
@@ -161,14 +182,14 @@ implementation
             dibujarVentana.bottomRight := bottomRight;
         end;
     end;
-
-    procedure menu(titulo : String; var menuData : registroMenu; var seleccion : Integer);
+    
+    procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer);
     var
         windowInfo : infoVentana;
         keyPressed : tecla;
         prefix : String[2];
         i : Integer;
-        width : Word;
+        width, alto : Word;
     begin
         if menuData.cantidad > 0 then
         begin
@@ -179,27 +200,35 @@ implementation
             else
                 dibujarEscape(false);
 
+            ///////////////////////////////////////////////////////////////////////////////////
+            { Calculo de dimensiones }
             width := Length(titulo);
-
             for i := 1 to menuData.cantidad do
             begin
                 if Length(menuData.opciones[i]) > width then
                     width := Length(menuData.opciones[i]);
             end;
-            
-            windowInfo := dibujarVentana(titulo, width + 10, menuData.cantidad + 5);
+            width := width + 10;
+            alto := menuData.cantidad + 6;
+            ///////////////////////////////////////////////////////////////////////////////////
 
-            {Si el titulo anda atrevido no hacemos anda}
+            windowInfo := dibujarVentana(titulo, width, alto);
+
             if windowInfo.topLeft.x = 0 then
             begin
                 seleccion := -1;
             end
             else
             begin
+                if (seleccion < 1) or (seleccion > menuData.cantidad) then
+                    seleccion := 1;
+
                 repeat
-                    for i := 1 to menuData.cantidad - 1 do
+                    { Renderizado de opciones }
+                    for i := 1 to menuData.cantidad do
                     begin
                         GotoXY(windowInfo.topLeft.x + 2, windowInfo.topLeft.y + 3 + i);
+
                         if i = seleccion then
                         begin
                             TextColor(Cyan);
@@ -210,21 +239,23 @@ implementation
                             TextColor(White);
                             prefix := '- ';
                         end;
-                        Write(prefix , menuData.opciones[i], ' ');
+                        Write(prefix, menuData.opciones[i], ' ');
                     end;
-                    GotoXY(dimensionesDeTerminal.x,dimensionesDeTerminal.y);
+
+                    GotoXY(dimensionesDeTerminal.x, dimensionesDeTerminal.y);
                     TextBackground(Black);
                     TextColor(White);
 
                     keyPressed := leerTecla;
+
                     case keyPressed of
                         arriba: 
                             if seleccion > 1 then 
                                 seleccion := seleccion - 1 
                             else 
-                                seleccion := menuData.cantidad - 1;
+                                seleccion := menuData.cantidad;
                         abajo: 
-                            if seleccion < menuData.cantidad - 1 then 
+                            if seleccion < menuData.cantidad then 
                                 seleccion := seleccion + 1 
                             else 
                                 seleccion := 1;
@@ -239,6 +270,111 @@ implementation
         end;
     end;
 
+    procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer);
+    var
+        windowInfo : infoVentana;
+        keyPressed : tecla;
+        prefix : String[2];
+        i : Integer;
+        width, alto, anchoTotalOpciones, espacioEntreOpciones : Word;
+        startX : Integer;
+    begin
+        if menuData.cantidad > 0 then
+        begin
+            ClrScr;
+
+            if titulo = 'Menu principal' then
+                dibujarEscape(true)
+            else
+                dibujarEscape(false);
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            { Calculo de dimensiones }
+            espacioEntreOpciones := 4; 
+            anchoTotalOpciones := 0;
+
+            for i := 1 to menuData.cantidad do
+            begin
+                anchoTotalOpciones := anchoTotalOpciones + Length(menuData.opciones[i]) + 4;
+            end;
+
+            anchoTotalOpciones := anchoTotalOpciones + (espacioEntreOpciones * (menuData.cantidad - 1));
+
+            width := Length(titulo);
+            for i := 1 to menuData.cantidad do
+            begin
+                if Length(menuData.opciones[i]) > width then
+                    width := Length(menuData.opciones[i]);
+            end;
+
+            if anchoTotalOpciones + 6 > width then
+                width := anchoTotalOpciones + 6
+            else
+                width := width + 10;
+
+            alto := 7;
+            ///////////////////////////////////////////////////////////////////////////////////
+
+            windowInfo := dibujarVentana(titulo, width, alto);
+
+            if windowInfo.topLeft.x = 0 then
+            begin
+                seleccion := -1;
+            end
+            else
+            begin
+                if (seleccion < 1) or (seleccion > menuData.cantidad) then
+                    seleccion := 1;
+
+                repeat
+                    { Renderizado de opciones }
+                    startX := windowInfo.topLeft.x + 6;
+                    for i := 1 to menuData.cantidad do
+                    begin
+                        GotoXY(startX, windowInfo.bottomRight.y - 2);
+
+                        if i = seleccion then
+                        begin
+                            TextColor(Cyan);
+                            prefix := '> ';
+                        end
+                        else
+                        begin
+                            TextColor(White);
+                            prefix := '  ';
+                        end;
+                        Write(prefix, menuData.opciones[i]);
+
+                        startX := startX + Length(menuData.opciones[i]) + 4 + espacioEntreOpciones - 2;
+                    end;
+
+                    GotoXY(dimensionesDeTerminal.x, dimensionesDeTerminal.y);
+                    TextBackground(Black);
+                    TextColor(White);
+
+                    keyPressed := leerTecla;
+
+                    case keyPressed of
+                        izquierda: 
+                            if seleccion > 1 then 
+                                seleccion := seleccion - 1 
+                            else 
+                                seleccion := menuData.cantidad;
+                        derecha: 
+                            if seleccion < menuData.cantidad then 
+                                seleccion := seleccion + 1 
+                            else 
+                                seleccion := 1;
+                        escape:
+                            begin
+                                seleccion := -1; 
+                                keyPressed := enter;
+                            end;
+                    end;
+                until keyPressed = enter;
+            end;
+        end;
+    end;
 
     procedure dibujarEscape(salir : Boolean);
     begin
@@ -266,13 +402,13 @@ implementation
     procedure inicializarMenu(var menuData : registroMenu);
     begin
         FillChar(menuData, SizeOf(menuData), #0);
-        menuData.cantidad := 1;
+        menuData.cantidad := 0;
     end;
     
     procedure agregarOpcion(var menuData : registroMenu; opcion : String);
     begin
-        menuData.opciones[menuData.cantidad] := opcion;
         menuData.cantidad := menuData.cantidad + 1;
+        menuData.opciones[menuData.cantidad] := opcion;
     end;
 
     function adentroDeVentanaActual(coordenadas : Vector2; windowInfo : infoVentana) : Boolean;

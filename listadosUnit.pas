@@ -14,7 +14,7 @@ type //Placeholder. Modificar según sea necesario.
     end;
 
 procedure listaCrear(var l : tLista);
-procedure listaAdd(var l : tLista; x: tDatoLista); //La Ñ no es nativamente interpretada en todos los entornos de Pascal, por lo que se opta por una alternativa.
+procedure listaAgregar(var l : tLista; x: tDatoLista);
 procedure listaRecuperar(var l : tLista;pos : byte; x : tDatoLista);
 procedure listaModificar(var l : tLista; pos : byte; var x : tDatoLista);
 function listaLlena(var l: tLista): boolean;
@@ -24,17 +24,15 @@ procedure listaOrdenar(var l : tLista; pos : byte);
 procedure listaBurbuja(var l : tLista);
 procedure listaBorrar(var l : tLista; pos : byte; var x : tDatoLista);
 procedure listaMostrar(var l : tLista);
-Procedure suprimirEspacios(var fullName: String; var simpleName: String); // Creo que esto puede ir a la unit de validaciones, o podemos crear una unit aparte para trabajar los strings, pero no estoy seguro, lo hablamos en clase.
-Procedure QuicksortApellidoNombre(var arch: tArchivoClientes ; path: String; first: Word; last: Word);
 
 implementation
 
-        procedure listaCrear(var l : tLista);
+    procedure listaCrear(var l : tLista);
     begin
         l.tam := 0;
     end;
 
-    procedure listaAdd(var l : tLista; x: tDatoLista);
+    procedure listaAgregar(var l : tLista; x: tDatoLista);
     begin
         inc(l.tam);
         l.elem[l.tam] := x;
@@ -122,59 +120,4 @@ implementation
             Writeln(x);
         end;
     end;
-
-    //Si se toma un String "fullname" con espacios, entonces la salida "simpleName" no los tendrá.
-    Procedure suprimirEspacios(var fullName: String; var simpleName: String);
-    var
-    i : Cardinal;
-    begin
-        simplename := fullname;
-        for i := 1 to SizeOf(fullname) do
-        begin
-            if fullname[i] = ' ' then
-                delete(simplename,i,1);
-        end;
-    end;
-
-    //En un futuro se sustituirá por un árbol de búsqueda.
-    Procedure QuicksortApellidoNombre(var arch: tArchivoClientes ; path: String; first: Word; last: Word);
-    var
-    lower, upper: Word;
-    temp, tempLower, tempUpper, pivot: datosCliente;
-    begin
-        InicializarArchivoClientes(arch,path);
-        lower := first;
-        upper := last;
-        LeerArchivoClientes(arch, (lower + upper) div 2, pivot);
-
-        repeat
-            LeerArchivoClientes(arch,lower,tempLower);
-
-            while tempLower.apellidoYNombres < pivot.apellidoYNombres do
-            begin
-                inc(lower);
-                LeerArchivoClientes(arch,upper,tempUpper);
-            end;
-            
-            while tempUpper.apellidoYNombres > pivot.apellidoYNombres do
-                dec(upper);
-
-            if lower <= upper then
-            begin
-                LeerArchivoClientes(arch,lower,temp);
-                tempLower := tempUpper;
-                tempUpper := temp;
-                inc(lower);
-                dec(upper);
-            end;
-
-        until lower > upper;
-
-        if upper > first then
-            QuicksortApellidoNombre(arch, path, first, upper);
-        
-        if lower < last then
-            QuicksortApellidoNombre(arch, path, lower, last);
-    end;  
-
 end.

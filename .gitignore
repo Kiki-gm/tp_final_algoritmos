@@ -1,6 +1,8 @@
 tempCodeRunnerFile.pas
 test.pas
+test2.pas
 
+*.dat
 *.ppu
 *.o
 *.exe

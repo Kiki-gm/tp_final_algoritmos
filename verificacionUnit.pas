@@ -8,10 +8,10 @@ function stringToReal(input : String): Real;
 function realToString(input : Real): String;
 function stringToInteger(input : String): Integer;
 function integerToString(input : Integer): String;
+function suprimirEspacios(fullName: String): String;
 
 implementation
 
-    {Si queres entender este codigo investiga como funciona Val(), una funcion de pascal}
     function esNumero(input : String): Boolean;
     var
         code : Integer;
@@ -85,7 +85,6 @@ implementation
         end;
     end;
 
-    {Si queres entender este codigo investiga como funciona Str(), una funcion de pascal}
     function realToString(input : Real): String;
     begin
         Str(input, realToString);
@@ -96,4 +95,15 @@ implementation
         Str(input, integerToString);
     end;
 
+    function suprimirEspacios(fullName: String): String;
+    var
+        i : Cardinal;
+    begin
+        simplename := fullname;
+        for i := 1 to SizeOf(fullname) do
+        begin
+            if fullname[i] = ' ' then
+                delete(simplename,i,1);
+        end;
+    end;
 end.

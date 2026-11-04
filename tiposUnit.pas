@@ -7,9 +7,9 @@ type
     tApellidoYNombres = String[64];
     tDireccion = String[32];
     tFecha = record
-        yy : word;
-        mm : 1..12;
-        dd : 1..31;
+        A : word;
+        M : 1..12;
+        D : 1..31;
     end;
     tCelular = String[32];
     tEmail = String[64];

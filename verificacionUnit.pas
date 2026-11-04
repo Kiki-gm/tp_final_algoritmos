@@ -9,8 +9,10 @@ interface
     function realToString(input : Real): String;
     function stringToInteger(input : String): Integer;
     function integerToString(input : Integer): String;
+
     function completarCeros(dni : tDNI) : tDNI;
     function esDNI(dni : tDNI) : Boolean;
+    
     function suprimirEspacios(fullName: String): String;
 
 implementation
@@ -112,7 +114,7 @@ implementation
 
     function esDNI(dni : tDNI) : Boolean;
     begin
-        esDNI := (Length(dni) >= 7) or (Length(dni) <= 8);
+        esDNI := (Length(dni) >= 7) and (Length(dni) <= 8);
     end;
 
     function suprimirEspacios(fullName: String): String;

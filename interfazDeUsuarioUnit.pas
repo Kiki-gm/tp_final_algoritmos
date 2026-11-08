@@ -29,16 +29,24 @@ type
     end;
 
 function leerTecla : tecla;
-function leerSoloNumeros(var stringModificable : String; max : Word) : tecla;
-function leerSoloTexto(var stringModificable : String; max : Word) : tecla;
+procedure leerSoloNumeros(var stringModificable : String; max : Word; var teclaRetorno : tecla);
+procedure leerSoloTexto(var stringModificable : String; max : Word; var teclaRetorno : tecla);
 function dimensionesDeTerminal : Vector2;
 procedure dibujarCaja(esquinaSuperiorIzquierda : Vector2; esquinaInferiorDerecha : Vector2);
 procedure dibujarEscape(salir : Boolean);
+procedure avanzarCursorVentana(var ventana : infoVentana);
 procedure escribirEnVentana(ventana : infoVentana; input : String);
-function dibujarVentana(titulo : String; anchoMinimo : Word; altoMinimo : Word; desplazamientoX : Integer; desplazamientoY : Integer) : infoVentana;
-procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer; desplazamientoX : Integer; desplazamientoY : Integer);
-procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer; anchoMinimo : Word; altoMinimo : Word; desplazamientoX : Integer; desplazamientoY : Integer);
-function adentroDeVentanaActual(coordenadas : Vector2; windowInfo : infoVentana) : Boolean;
+procedure escribirSeguido(var ventana : infoVentana; input : String; color : Byte);
+function espacioLibre(ventana : infoVentana) : Integer;
+procedure limpiarVentana(ventana : infoVentana);
+procedure limpiarLineaEnVentana(ventana : infoVentana);
+function dibujarVentana(titulo : String; anchoMinimo : Word; altoMinimo : Word; 
+                        desplazamientoX : Integer; desplazamientoY : Integer) : infoVentana;
+procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer; 
+                       desplazamientoX : Integer; desplazamientoY : Integer);
+procedure menuHorizontal(titulo : String; var menuData : registroMenu; var seleccion : Integer; 
+                         anchoMinimo : Word; altoMinimo : Word; desplazamientoX : Integer; 
+                         desplazamientoY : Integer);
 procedure inicializarMenu(var menuData : registroMenu);
 procedure agregarOpcion(var menuData : registroMenu; opcion : String);
 
@@ -114,7 +122,7 @@ implementation
         until keyDetected;
     end;
 
-    function leerSoloTexto(var stringModificable : String; max : Word) : tecla;
+    procedure leerSoloTexto(var stringModificable : String; max : Word; var teclaRetorno : tecla);
     var
         ch : Char;
     begin
@@ -125,7 +133,7 @@ implementation
             if Length(stringModificable) < max then 
             begin
                 stringModificable := stringModificable + ch;
-                leerSoloTexto := texto; 
+                teclaRetorno := texto; 
             end;
         end
         else
@@ -135,22 +143,22 @@ implementation
                 begin
                     if Length(stringModificable) > 0 then
                         Delete(stringModificable, Length(stringModificable), 1);
-                    leerSoloTexto := borrar;
+                    teclaRetorno := borrar;
                 end;
                 #13:
-                    leerSoloTexto := enter;
+                    teclaRetorno := enter;
                 #27: 
-                    leerSoloTexto := escape;
+                    teclaRetorno := escape;
                 #0:
                 begin
                     ch := ReadKey;
-                    leerSoloTexto := arriba;
+                    teclaRetorno := arriba;
                 end;
             end;
         end;
     end;
 
-    function leerSoloNumeros(var stringModificable : String; max : Word) : tecla;
+    procedure leerSoloNumeros(var stringModificable : String; max : Word; var teclaRetorno : tecla);
     var
         teclaPresionada : String;
     begin
@@ -159,7 +167,7 @@ implementation
         if esNumero(teclaPresionada) and (Length(stringModificable) < max) then
         begin
             stringModificable := stringModificable + teclaPresionada;
-            leerSoloNumeros := numero;
+            teclaRetorno := numero;
         end;
 
         case teclaPresionada of
@@ -168,30 +176,74 @@ implementation
                 teclaPresionada := ReadKey;
                 if teclaPresionada = #83 then
                     Delete(stringModificable,Length(stringModificable),1);
-                leerSoloNumeros := borrar;
+                teclaRetorno := borrar;
             end;
             #8:
             begin
                 Delete(stringModificable,Length(stringModificable),1);
-                leerSoloNumeros := borrar;
+                teclaRetorno := borrar;
             end;
-            #13: leerSoloNumeros := enter;
-            #27: leerSoloNumeros := escape;
+            #13: teclaRetorno := enter;
+            #27: teclaRetorno := escape;
+        end;
+    end;
+
+    procedure avanzarCursorVentana(var ventana : infoVentana);
+    begin
+        Inc(ventana.cursor.y);
+        if (ventana.cursor.y > (ventana.bottomRight.y - 2)) then
+        begin
+            ventana.cursor.y := ventana.topLeft.y + 4;
         end;
     end;
 
     procedure escribirEnVentana(ventana : infoVentana; input : String);
+    begin
+        GotoXY(ventana.cursor.x, ventana.cursor.y);
+        Write(input);
+    end;
+
+    procedure escribirSeguido(var ventana : infoVentana; input : String; color : Byte);
+    begin
+        GotoXY(ventana.cursor.x, ventana.cursor.y);
+        TextColor(color);
+        Write(input);
+        ventana.cursor.x := ventana.cursor.x + Length(input);
+    end;
+
+    function espacioLibre(ventana : infoVentana) : Integer;
+    begin
+        espacioLibre := Integer(ventana.bottomRight.x) - 1 - Integer(ventana.cursor.x);
+    end;
+
+    procedure limpiarVentana(ventana : infoVentana);
     var
         tempString : String;
         i : Word;
     begin
-        GotoXY(ventana.cursor.x, ventana.cursor.y);
         tempString := '';
-        for i := 1 to ((ventana.bottomRight.x - ventana.topLeft.x) - 4) do
+        for i := 1 to ((ventana.bottomRight.x - ventana.topLeft.x) - 2) do
+        begin
             tempString := tempString + ' ';
-        Write(tempString);
-        GotoXY(ventana.cursor.x, ventana.cursor.y);
-        Write(input);
+        end;
+        for i := 1 to ((ventana.bottomRight.y - ventana.topLeft.y) - 4) do
+        begin
+            escribirEnVentana(ventana, tempString);
+            avanzarCursorVentana(ventana);
+        end;
+    end;
+
+    procedure limpiarLineaEnVentana(ventana : infoVentana);
+    var
+        tempString : String;
+        i : Word;
+    begin
+        tempString := '';
+        for i := 1 to ((ventana.bottomRight.x - ventana.topLeft.x) - 2) do
+        begin
+            tempString := tempString + ' ';
+        end;
+        escribirEnVentana(ventana, tempString);
     end;
 
     function dimensionesDeTerminal : Vector2;
@@ -202,17 +254,17 @@ implementation
 
     procedure dibujarCaja(esquinaSuperiorIzquierda : Vector2; esquinaInferiorDerecha : Vector2);
     var
-        i,j : Word;
+        i, j : Word;
     begin
         for i := esquinaSuperiorIzquierda.x to esquinaInferiorDerecha.x do
         begin
-            for j := esquinaSuperiorIzquierda.y to esquinaInferiorDerecha.y do
-            begin
-                GotoXY(i,j);
-                if (j = esquinaSuperiorIzquierda.y) or (j = esquinaInferiorDerecha.y) or 
-                   (i = esquinaSuperiorIzquierda.x) or (i = esquinaInferiorDerecha.x) then
-                    Write('#');
-            end;
+            GotoXY(i, esquinaSuperiorIzquierda.y);  Write('#');
+            GotoXY(i, esquinaInferiorDerecha.y);    Write('#');
+        end;
+        for j := esquinaSuperiorIzquierda.y + 1 to esquinaInferiorDerecha.y - 1 do
+        begin
+            GotoXY(esquinaSuperiorIzquierda.x, j);  Write('#');
+            GotoXY(esquinaInferiorDerecha.x, j);    Write('#');
         end;
     end;
 
@@ -222,6 +274,11 @@ implementation
         dimensionesValidas : Boolean;
     begin
         bottomRight := dimensionesDeTerminal;
+
+        if altoMinimo = 0 then
+            altoMinimo := 5
+        else
+            altoMinimo := altoMinimo + 6;
 
         if (anchoMinimo > (bottomRight.x - 42)) and (altoMinimo > (bottomRight.y - 8)) then
             dimensionesValidas := false
@@ -284,7 +341,7 @@ implementation
                     width := Length(menuData.opciones[i]);
             end;
             width := width + 10;
-            height := menuData.cantidad + 6;
+            height := menuData.cantidad;
             ///////////////////////////////////////////////////////////////////////////////////
 
             windowInfo := dibujarVentana(titulo, width, height, desplazamientoX, desplazamientoY);
@@ -383,8 +440,6 @@ implementation
                 width := width + 10;
 
             height := altoMinimo;
-            if height < 7 then
-                height := 7;
             ///////////////////////////////////////////////////////////////////////////////////
 
             windowInfo := dibujarVentana(titulo, width, height, desplazamientoX, desplazamientoY);
@@ -481,14 +536,6 @@ implementation
     begin
         menuData.cantidad := menuData.cantidad + 1;
         menuData.opciones[menuData.cantidad] := opcion;
-    end;
-
-    function adentroDeVentanaActual(coordenadas : Vector2; windowInfo : infoVentana) : Boolean;
-    begin
-        adentroDeVentanaActual := (coordenadas.x > windowInfo.topLeft.x) and 
-                                  (coordenadas.x < windowInfo.bottomRight.x) and 
-                                  (coordenadas.y > windowInfo.topLeft.y) and 
-                                  (coordenadas.y < windowInfo.bottomRight.y);
     end;
 
 end.

@@ -10,6 +10,9 @@ interface
     function stringToInteger(input : String): Integer;
     function integerToString(input : Integer): String;
 
+    function numeroConCeros(n, digitos : Integer) : String;
+    function diasDelMes(m, a : Integer) : Integer;
+
     function completarCeros(dni : tDNI) : tDNI;
     function esDNI(dni : tDNI) : Boolean;
     
@@ -115,6 +118,29 @@ implementation
     function esDNI(dni : tDNI) : Boolean;
     begin
         esDNI := (Length(dni) >= 7) and (Length(dni) <= 8);
+    end;
+
+    function numeroConCeros(n, digitos : Integer) : String;
+    var
+        s : String;
+    begin
+        Str(n, s);
+        while Length(s) < digitos do
+            s := '0' + s;
+        numeroConCeros := s;
+    end;
+
+    function diasDelMes(m, a : Integer) : Integer;
+    begin
+        case m of
+            1, 3, 5, 7, 8, 10, 12: diasDelMes := 31;
+            4, 6, 9, 11:           diasDelMes := 30;
+        else
+            if ((a mod 4 = 0) and (a mod 100 <> 0)) or (a mod 400 = 0) then
+                diasDelMes := 29
+            else
+                diasDelMes := 28;
+        end;
     end;
 
     function suprimirEspacios(fullName: String): String;

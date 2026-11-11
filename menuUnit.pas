@@ -313,7 +313,10 @@ implementation
             repeat
                 dibujarFila(cliente, form, campo);
                 k := texto;
-                leerSoloTexto(form.textoTemp, max, k);
+                if campo = 4 then
+                    leerSoloNumeros(form.textoTemp, max, k)
+                else
+                    leerSoloTexto(form.textoTemp, max, k);
 
                 if k = enter then
                 begin

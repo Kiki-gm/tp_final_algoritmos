@@ -5,6 +5,7 @@ uses tiposUnit;
 
 type
     datosPoliza = record
+        numPol : Cardinal;
         DNI : tDNI;
         fecha : record
             carga : tFecha;
@@ -21,7 +22,6 @@ type
         estado : tEstado;
     end;
 
-    
 
 implementation
 

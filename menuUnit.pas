@@ -64,8 +64,36 @@ implementation
 
         // validacion dejada vacia a proposito
         function campoValido(campo : Integer; cliente : datosCliente) : Boolean;
+        var
+            i : integer;
         begin
-            campoValido := true;
+
+            case campo of
+                1: 
+                    begin
+                        verificarNombre(cliente.apellidoYNombres, campoValido);
+                    end; 
+
+                2: //Esta la podemos ver, pero conviene discutirla porque es jodida.
+                    begin
+                        verificarDireccion(cliente.direccion, campoValido);
+                    end; 
+                
+                3:
+                    begin
+                        verificarFechaNac(cliente.fechaDeNacimiento, campoValido);  
+                    end;
+
+                4:
+                    begin
+                        verificarCel(cliente.celular, campoValido)  
+                    end;
+
+                5: 
+                    begin
+                        verificarEmail(cliente.email, campoValido);
+                    end;  
+            end; 
         end;
 
         function etiquetaCampo(campo : Integer) : String;

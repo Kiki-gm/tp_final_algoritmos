@@ -66,11 +66,11 @@ implementation
         procedure campoValido(campo : Integer; cliente : datosCliente; var error : String; var validInput : Boolean);
         begin
             case campo of
-                1: validInput := true;
+                1: verificarNombre(cliente.apellidoYNombres, campoValido);
                 2: validInput := true;
-                3: validInput := true;
-                4: validInput := true;
-                5: validInput := true;
+                3: verificarFechaNac(cliente.fechaDeNacimiento, campoValido); 
+                4: verificarCel(cliente.celular, campoValido);
+                5: verificarEmail(cliente.email, campoValido);
             else
                 validInput := false;
             end;

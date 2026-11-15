@@ -63,9 +63,17 @@ implementation
             end;
 
         // validacion dejada vacia a proposito
-        function campoValido(campo : Integer; cliente : datosCliente) : Boolean;
+        procedure campoValido(campo : Integer; cliente : datosCliente; var error : String; var validInput : Boolean);
         begin
-            campoValido := true;
+            case campo of
+                1: validInput := true;
+                2: validInput := true;
+                3: validInput := true;
+                4: validInput := true;
+                5: validInput := true;
+            else
+                validInput := false;
+            end;
         end;
 
         function etiquetaCampo(campo : Integer) : String;
@@ -297,6 +305,10 @@ implementation
         var
             k : tecla;
             copia : datosCliente;
+            error : String;
+            menuError : registroMenu;
+            inputValido : Boolean;
+            seleccionError : Integer;
             campo : Integer;
             max : Word;
         begin
@@ -322,10 +334,20 @@ implementation
                 begin
                     copia := cliente;
                     asignarCampo(copia, campo, form.textoTemp);
-                    if campoValido(campo, copia) then
+                    campoValido(campo, copia, error, inputValido);
+                    if inputValido then
                     begin
                         cliente := copia;
                         confirmado := true;
+                    end
+                    else
+                    begin
+                        inicializarMenu(menuError);
+                        agregarOpcion(menuError, 'Presione enter para continuar');
+                        seleccionError := 1;
+
+                        menuVertical('Error: ' + error, menuError, seleccionError, 0, 11);
+                        limpiarConsolaEn(menuError.ventana);
                     end;
                 end;
             until confirmado or (k = escape);
@@ -402,8 +424,6 @@ implementation
                     copia.fechaDeNacimiento.D := d;
                     copia.fechaDeNacimiento.M := m;
                     copia.fechaDeNacimiento.A := a;
-                    if campoValido(3, copia) then
-                        confirmado := true;
                 end;
             until confirmado or (k = escape);
 

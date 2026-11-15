@@ -24,6 +24,7 @@ type
     end;
 
     registroMenu = record
+        ventana : infoVentana;
         opciones : array[1..maxOpciones] of String;
         cantidad : Integer;
     end;
@@ -40,6 +41,7 @@ procedure escribirSeguido(var ventana : infoVentana; input : String; color : Byt
 function espacioLibre(ventana : infoVentana) : Integer;
 procedure limpiarVentana(ventana : infoVentana);
 procedure limpiarLineaEnVentana(ventana : infoVentana);
+procedure limpiarConsolaEn(ventana : infoVentana);
 function dibujarVentana(titulo : String; anchoMinimo : Word; altoMinimo : Word; 
                         desplazamientoX : Integer; desplazamientoY : Integer) : infoVentana;
 procedure menuVertical(titulo : String; var menuData : registroMenu; var seleccion : Integer; 
@@ -211,6 +213,23 @@ implementation
         ventana.cursor.x := ventana.cursor.x + Length(input);
     end;
 
+    procedure limpiarConsolaEn(ventana : infoVentana);
+    var
+        tempString : String;
+        i : Word;
+    begin
+        tempString := '';
+        for i := 0 to (ventana.bottomRight.x - ventana.topLeft.x) do
+        begin
+            tempString := tempString + ' ';
+        end;
+        for i := 0 to (ventana.bottomRight.y - ventana.topLeft.y) do
+        begin
+            GotoXY(ventana.topLeft.x, ventana.topLeft.y + i);
+            Write(tempString);
+        end;
+    end;
+
     function espacioLibre(ventana : infoVentana) : Integer;
     begin
         espacioLibre := Integer(ventana.bottomRight.x) - 1 - Integer(ventana.cursor.x);
@@ -345,6 +364,7 @@ implementation
             ///////////////////////////////////////////////////////////////////////////////////
 
             windowInfo := dibujarVentana(titulo, width, height, desplazamientoX, desplazamientoY);
+            menuData.ventana := windowInfo;
 
             if windowInfo.topLeft.x = 0 then
             begin
@@ -443,6 +463,7 @@ implementation
             ///////////////////////////////////////////////////////////////////////////////////
 
             windowInfo := dibujarVentana(titulo, width, height, desplazamientoX, desplazamientoY);
+            menuData.ventana := windowInfo;
 
             if windowInfo.topLeft.x = 0 then
             begin

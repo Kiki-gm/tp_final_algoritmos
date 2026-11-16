@@ -13,6 +13,7 @@ implementation
         minA = 1800;
         maxA = 2008;
 
+
     procedure salirDelPrograma(var clientsF : tArchivoClientes);
     var
         temp : String[3];
@@ -292,11 +293,11 @@ implementation
 
         procedure moverFila(cliente : datosCliente; var form : registroFormulario; delta : Integer);
         var
-            vieja : Integer;
+            anterior : Integer;
         begin
-            vieja := form.seleccion;
-            form.seleccion := moverSeleccion(vieja, delta);
-            dibujarFila(cliente, form, vieja);
+            anterior := form.seleccion;
+            form.seleccion := moverSeleccion(anterior, delta);
+            dibujarFila(cliente, form, anterior);
             dibujarFila(cliente, form, form.seleccion);
         end;
 
@@ -653,6 +654,156 @@ implementation
                 textoTemp     : String;
                 completados   : array[1..2] of Boolean;
             end;
+        
+        function etiquetaCampoPoliza(campo : Integer) : String;
+        begin
+            case campo of
+                1: etiquetaCampoPoliza := 'Marca: ';
+                2: etiquetaCampoPoliza := 'Modelo: ';
+                3: etiquetaCampoPoliza := 'Año Vehiculo: ';
+                4: etiquetaCampoPoliza := 'Cobertura: ';
+                5: etiquetaCampoPoliza := 'Vigencia Desde: ';
+                6: etiquetaCampoPoliza := 'Vigencia Hasta: ';
+            else
+                etiquetaCampoPoliza := '';
+            end;
+        end;
+
+        function obtenerCampoPolizaTexto(poliza : datosPoliza; campo : Integer) : String;
+        begin
+            case campo of
+                1: obtenerCampoPolizaTexto := poliza.marca;
+                2: obtenerCampoPolizaTexto := poliza.modelo;
+                3: obtenerCampoPolizaTexto := integerToString(poliza.yearVehicle);
+            else
+                obtenerCampoPolizaTexto := '';
+            end;
+        end;
+
+        function todosCompletadosPoliza(form : registroFormularioPoliza) : Boolean;
+        var
+            i : Integer;
+            ok : Boolean;
+        begin
+            ok := true;
+            for i := 1 to 6 do
+                if not form.completados[i] then
+                    ok := false;
+            todosCompletadosPoliza := ok;
+        end;
+        procedure escribirFechaPoliza(fecha : tFecha; form : registroFormularioPoliza; campoActual, filaEval : Integer; colorBase : Byte; var ventana : infoVentana);
+        var
+            pendiente : Boolean;
+            colorD, colorM, colorA : Byte;
+        begin
+            pendiente := (form.modo = modoAltaPoliza) and (not form.completados[filaEval]) and (form.campoFecha = 0);
+
+            if pendiente then
+                colorBase := DarkGray;
+
+            colorD := colorBase;
+            colorM := colorBase;
+            colorA := colorBase;
+            if (form.campoFecha > 0) and (form.tipoFechaActiva = filaEval) then
+            begin
+                if form.campoFecha = 1 then colorD := Yellow;
+                if form.campoFecha = 2 then colorM := Yellow;
+                if form.campoFecha = 3 then colorA := Yellow;
+            end;
+
+            escribirSeguido(ventana, numeroConCeros(fecha.D, 2), colorD);
+            escribirSeguido(ventana, '/', colorBase);
+            escribirSeguido(ventana, numeroConCeros(fecha.M, 2), colorM);
+            escribirSeguido(ventana, '/', colorBase);
+            escribirSeguido(ventana, numeroConCeros(fecha.A, 4), colorA);
+        end;
+
+        procedure dibujarFilaPoliza(poliza : datosPoliza; form : registroFormularioPoliza; i : Integer);
+        var
+            v : infoVentana;
+            filaActiva, editando : Boolean;
+            colorBase : Byte;
+        begin
+            if form.ventana.topLeft.x <> 0 then
+            begin
+                v := form.ventana;
+                v.cursor.y := v.cursor.y + i - 1;
+
+                limpiarLineaEnVentana(v);
+
+                editando := form.editandoTexto or (form.campoFecha <> 0);
+                filaActiva := (i = form.seleccion);
+                if filaActiva then colorBase := Cyan else colorBase := White;
+
+                if filaActiva then
+                begin
+                    if editando and (i <= 6) then
+                        escribirSeguido(v, '> [EDITANDO] ', colorBase)
+                    else
+                        escribirSeguido(v, '> ', colorBase);
+                end
+                else
+                    escribirSeguido(v, '  ', colorBase);
+
+                case i of
+                    1..3:
+                    begin
+                        escribirSeguido(v, etiquetaCampoPoliza(i), colorBase);
+                        if filaActiva and form.editandoTexto then
+                            escribirSeguido(v, form.textoTemp + '_', White)
+                        else if (form.modo = modoAltaPoliza) and (not form.completados[i]) then
+                            escribirSeguido(v, '<pendiente>', DarkGray)
+                        else
+                            escribirSeguido(v, obtenerCampoPolizaTexto(poliza, i), colorBase);
+                    end;
+                    4:
+                    begin
+                        escribirSeguido(v, etiquetaCampoPoliza(4), colorBase);
+                        if filaActiva and form.editandoTexto then
+                            escribirSeguido(v, obtenerTextoCobertura(poliza.cobertura), Yellow)
+                        else if (form.modo = modoAltaPoliza) and (not form.completados[4]) then
+                            escribirSeguido(v, '<pendiente>', DarkGray)
+                        else
+                            escribirSeguido(v, obtenerTextoCobertura(poliza.cobertura), colorBase);
+                    end;
+                    5:
+                    begin
+                        escribirSeguido(v, etiquetaCampoPoliza(5), colorBase);
+                        escribirFechaPoliza(poliza.fecha.vigenciaDesde, form, form.campoFecha, 5, colorBase, v);
+                    end;
+                    6:
+                    begin
+                        escribirSeguido(v, etiquetaCampoPoliza(6), colorBase);
+                        escribirFechaPoliza(poliza.fecha.vigenciaHasta, form, form.campoFecha, 6, colorBase, v);
+                    end;
+                    7:
+                    begin
+                        escribirSeguido(v, 'Estado: ', colorBase);
+                        if poliza.estado then
+                            escribirSeguido(v, 'Activo', colorBase)
+                        else
+                            escribirSeguido(v, 'Inactivo', colorBase);
+                    end;
+                    8:
+                    begin
+                        case form.modo of
+                            modoVerPoliza:
+                                escribirSeguido(v, '--- OPCIONES ---', colorBase);
+                            modoEditarPoliza:
+                                escribirSeguido(v, '--- GUARDAR CAMBIOS ---', LightGreen);
+                            modoAltaPoliza:
+                                if todosCompletadosPoliza(form) then
+                                    escribirSeguido(v, '--- CONFIRMAR POLIZA ---', LightGreen)
+                                else
+                                    escribirSeguido(v, '--- CONFIRMAR POLIZA ---', DarkGray);
+                        end;
+                    end;
+                end;
+
+                TextColor(White);
+                GotoXY(dimensionesDeTerminal.x, dimensionesDeTerminal.y);
+            end;
+        end;
 
         procedure campoPolizaValido(campo : Integer; poliza : datosPoliza; var validInput : Boolean; var error : String);
         begin
@@ -666,6 +817,36 @@ implementation
             else
                 validInput := true;
             end;
+        end;
+
+        procedure editarCoberturaPoliza(var cobertura : tipoCobertura; var form : registroFormularioPoliza; tipoFila : Integer; var confirmado : Boolean; var polizaRef : datosPoliza);
+        var
+            k : tecla;
+        begin
+            form.editandoTexto := true;
+            confirmado := false;
+
+            repeat
+                dibujarFilaPoliza(polizaRef, form, tipoFila);
+                k := leerTecla;
+
+                case k of
+                    arriba:
+                        if Ord(cobertura) > 0 then
+                            cobertura := tipoCobertura(Ord(cobertura) - 1)
+                        else
+                            cobertura := tipoCobertura(4);
+                    abajo:
+                        if Ord(cobertura) < 4 then 
+                            cobertura := tipoCobertura(Ord(cobertura) + 1)
+                        else
+                            cobertura := tipoCobertura(0);
+                end;
+            until (k = enter) or (k = escape);
+
+            form.editandoTexto := false;
+            if k = enter then
+                confirmado := true;
         end;
 
         procedure dibujarFilaBusquedaPoliza(dni, patente : String; form : registroFormularioBusquedaPoliza; i : Integer);
@@ -828,32 +1009,6 @@ implementation
             ClrScr;
         end;
 
-        function etiquetaCampoPoliza(campo : Integer) : String;
-        begin
-            case campo of
-                1: etiquetaCampoPoliza := 'Marca: ';
-                2: etiquetaCampoPoliza := 'Modelo: ';
-                3: etiquetaCampoPoliza := 'Año Vehiculo: ';
-                4: etiquetaCampoPoliza := 'Cobertura (1-5): ';
-                5: etiquetaCampoPoliza := 'Vigencia Desde: ';
-                6: etiquetaCampoPoliza := 'Vigencia Hasta: ';
-            else
-                etiquetaCampoPoliza := '';
-            end;
-        end;
-
-        function obtenerCampoPolizaTexto(poliza : datosPoliza; campo : Integer) : String;
-        begin
-            case campo of
-                1: obtenerCampoPolizaTexto := poliza.marca;
-                2: obtenerCampoPolizaTexto := poliza.modelo;
-                3: obtenerCampoPolizaTexto := integerToString(poliza.yearVehicle);
-                4: obtenerCampoPolizaTexto := integerToString(Ord(poliza.cobertura) + 1);
-            else
-                obtenerCampoPolizaTexto := '';
-            end;
-        end;
-
         procedure asignarCampoPolizaTexto(var poliza : datosPoliza; campo : Integer; valor : String);
         var
             covInt : Integer;
@@ -881,18 +1036,6 @@ implementation
             moverSeleccionPoliza := sel;
         end;
 
-        function todosCompletadosPoliza(form : registroFormularioPoliza) : Boolean;
-        var
-            i : Integer;
-            ok : Boolean;
-        begin
-            ok := true;
-            for i := 1 to 6 do
-                if not form.completados[i] then
-                    ok := false;
-            todosCompletadosPoliza := ok;
-        end;
-
         procedure inicializarFormularioPoliza(var form : registroFormularioPoliza; modo : tModoFormularioPoliza);
         var
             i : Integer;
@@ -907,115 +1050,6 @@ implementation
             form.campoFecha := 0;
             for i := 1 to 6 do
                 form.completados[i] := false;
-        end;
-
-        procedure escribirValorPoliza(valor : String; color : Byte; var ventana : infoVentana);
-        begin
-            escribirSeguido(ventana, valor, color);
-        end;
-
-        procedure escribirFechaPoliza(fecha : tFecha; form : registroFormularioPoliza; campoActual, filaEval : Integer; colorBase : Byte; var ventana : infoVentana);
-        var
-            pendiente : Boolean;
-            colorD, colorM, colorA : Byte;
-        begin
-            pendiente := (form.modo = modoAltaPoliza) and (not form.completados[filaEval]) and (form.campoFecha = 0);
-
-            if pendiente then
-                colorBase := DarkGray;
-
-            colorD := colorBase;
-            colorM := colorBase;
-            colorA := colorBase;
-            if (form.campoFecha > 0) and (form.tipoFechaActiva = filaEval) then
-            begin
-                if form.campoFecha = 1 then colorD := Yellow;
-                if form.campoFecha = 2 then colorM := Yellow;
-                if form.campoFecha = 3 then colorA := Yellow;
-            end;
-
-            escribirSeguido(ventana, numeroConCeros(fecha.D, 2), colorD);
-            escribirSeguido(ventana, '/', colorBase);
-            escribirSeguido(ventana, numeroConCeros(fecha.M, 2), colorM);
-            escribirSeguido(ventana, '/', colorBase);
-            escribirSeguido(ventana, numeroConCeros(fecha.A, 4), colorA);
-        end;
-
-        procedure dibujarFilaPoliza(poliza : datosPoliza; form : registroFormularioPoliza; i : Integer);
-        var
-            v : infoVentana;
-            filaActiva, editando : Boolean;
-            colorBase : Byte;
-        begin
-            if form.ventana.topLeft.x <> 0 then
-            begin
-                v := form.ventana;
-                v.cursor.y := v.cursor.y + i - 1;
-
-                limpiarLineaEnVentana(v);
-
-                editando := form.editandoTexto or (form.campoFecha <> 0);
-                filaActiva := (i = form.seleccion);
-                if filaActiva then colorBase := Cyan else colorBase := White;
-
-                if filaActiva then
-                begin
-                    if editando and (i <= 6) then
-                        escribirSeguido(v, '> [EDITANDO] ', colorBase)
-                    else
-                        escribirSeguido(v, '> ', colorBase);
-                end
-                else
-                    escribirSeguido(v, '  ', colorBase);
-
-                case i of
-                    1..4:
-                    begin
-                        escribirSeguido(v, etiquetaCampoPoliza(i), colorBase);
-                        if filaActiva and form.editandoTexto then
-                            escribirValorPoliza(form.textoTemp + '_', White, v)
-                        else if (form.modo = modoAltaPoliza) and (not form.completados[i]) then
-                            escribirSeguido(v, '<pendiente>', DarkGray)
-                        else
-                            escribirValorPoliza(obtenerCampoPolizaTexto(poliza, i), colorBase, v);
-                    end;
-                    5:
-                    begin
-                        escribirSeguido(v, etiquetaCampoPoliza(5), colorBase);
-                        escribirFechaPoliza(poliza.fecha.vigenciaDesde, form, form.campoFecha, 5, colorBase, v);
-                    end;
-                    6:
-                    begin
-                        escribirSeguido(v, etiquetaCampoPoliza(6), colorBase);
-                        escribirFechaPoliza(poliza.fecha.vigenciaHasta, form, form.campoFecha, 6, colorBase, v);
-                    end;
-                    7:
-                    begin
-                        escribirSeguido(v, 'Estado: ', colorBase);
-                        if poliza.estado then
-                            escribirSeguido(v, 'Activo', colorBase)
-                        else
-                            escribirSeguido(v, 'Inactivo', colorBase);
-                    end;
-                    8:
-                    begin
-                        case form.modo of
-                            modoVerPoliza:
-                                escribirSeguido(v, '--- OPCIONES / ACCIONES ---', colorBase);
-                            modoEditarPoliza:
-                                escribirSeguido(v, '--- GUARDAR / VOLVER ---', LightGreen);
-                            modoAltaPoliza:
-                                if todosCompletadosPoliza(form) then
-                                    escribirSeguido(v, '--- CONFIRMAR POLIZA ---', LightGreen)
-                                else
-                                    escribirSeguido(v, '--- CONFIRMAR POLIZA ---', DarkGray);
-                        end;
-                    end;
-                end;
-
-                TextColor(White);
-                GotoXY(dimensionesDeTerminal.x, dimensionesDeTerminal.y);
-            end;
         end;
 
         procedure dibujarFormularioPolizaCompleto(poliza : datosPoliza; var form : registroFormularioPoliza);
@@ -1037,11 +1071,11 @@ implementation
 
         procedure moverFilaPoliza(poliza : datosPoliza; var form : registroFormularioPoliza; delta : Integer);
         var
-            vieja : Integer;
+            anterior : Integer;
         begin
-            vieja := form.seleccion;
-            form.seleccion := moverSeleccionPoliza(vieja, delta);
-            dibujarFilaPoliza(poliza, form, vieja);
+            anterior := form.seleccion;
+            form.seleccion := moverSeleccionPoliza(anterior, delta);
+            dibujarFilaPoliza(poliza, form, anterior);
             dibujarFilaPoliza(poliza, form, form.seleccion);
         end;
 
@@ -1096,36 +1130,6 @@ implementation
             until confirmado or (k = escape);
 
             form.editandoTexto := false;
-        end;
-
-        procedure editarCoberturaPoliza(var cobertura : tipoCobertura; var form : registroFormularioPoliza; tipoFila : Integer; var confirmado : Boolean; var polizaRef : datosPoliza);
-        var
-            k : tecla;
-        begin
-            form.editandoTexto := true;
-            confirmado := false;
-
-            repeat
-                dibujarFilaPoliza(polizaRef, form, tipoFila);
-                k := leerTecla;
-
-                case k of
-                    arriba:
-                        if Ord(cobertura) > 0 then
-                            cobertura := tipoCobertura(Ord(cobertura) - 1)
-                        else
-                            cobertura := tipoCobertura(4);
-                    abajo:
-                        if Ord(cobertura) < 4 then 
-                            cobertura := tipoCobertura(Ord(cobertura) + 1)
-                        else
-                            cobertura := tipoCobertura(0);
-                end;
-            until (k = enter) or (k = escape);
-
-            form.editandoTexto := false;
-            if k = enter then
-                confirmado := true;
         end;
 
         procedure editarFechaPoliza(var fecha : tFecha; var form : registroFormularioPoliza; tipoFila : Integer; var confirmado : Boolean; var polizaRef : datosPoliza);
@@ -1228,6 +1232,7 @@ implementation
         procedure menuModificacionPoliza(var fPol : tArchivoPolizas; indiceRegistro : Integer; var poliza : datosPoliza);
         var
             form : registroFormularioPoliza;
+            polizaCopia : datosPoliza;
             k : tecla;
             salir, confirmado : Boolean;
             menuError : registroMenu;
@@ -1238,74 +1243,69 @@ implementation
                 inicializarMenu(menuError);
                 agregarOpcion(menuError, 'Aceptar');
                 selErr := 1;
-                menuHorizontal('La poliza esta inactiva. No se puede modificar.', menuError, selErr, 45, 1, 0, 0);
+                menuHorizontal('La poliza esta inactiva. No se puede modificar.', menuError, selErr, 45, 1, 0, 11);
                 limpiarConsolaEn(menuError.ventana);
                 exit;
             end;
 
+            polizaCopia := poliza;
             inicializarFormularioPoliza(form, modoEditarPoliza);
             salir := false;
             ClrScr;
-            dibujarFormularioPolizaCompleto(poliza, form);
+            dibujarFormularioPolizaCompleto(polizaCopia, form);
 
             repeat
                 k := leerTecla;
 
                 case k of
-                    arriba: moverFilaPoliza(poliza, form, -1);
-                    abajo:  moverFilaPoliza(poliza, form, 1);
+                    arriba: moverFilaPoliza(polizaCopia, form, -1);
+                    abajo:  moverFilaPoliza(polizaCopia, form, 1);
                     escape: salir := true;
                     enter:
                         case form.seleccion of
                             1..3:
                             begin
-                                editarCampoTextoPoliza(poliza, form, confirmado);
+                                editarCampoTextoPoliza(polizaCopia, form, confirmado);
                                 if confirmado then
                                 begin
-                                    poliza.sumaAsegurada := 676767; ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                    poliza.valorCuota := valorCuota(poliza);
-                                    escribirArchivoPolizas(fPol, indiceRegistro, poliza);
+                                    polizaCopia.sumaAsegurada := 676767; ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
                                 end;
-                                dibujarFilaPoliza(poliza, form, form.seleccion);
-                                dibujarFilaPoliza(poliza, form, 8);
+                                dibujarFilaPoliza(polizaCopia, form, form.seleccion);
+                                dibujarFilaPoliza(polizaCopia, form, 8);
                             end;
                             4:
                             begin
-                                editarCoberturaPoliza(poliza.cobertura, form, 4, confirmado, poliza);
+                                editarCoberturaPoliza(polizaCopia.cobertura, form, 4, confirmado, polizaCopia);
                                 if confirmado then
                                 begin
                                     form.completados[4] := true;
-                                    poliza.sumaAsegurada := 676767; ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                                    poliza.valorCuota := valorCuota(poliza);
-                                    escribirArchivoPolizas(fPol, indiceRegistro, poliza);
+                                    polizaCopia.sumaAsegurada := 676767; ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
                                 end;
-                                dibujarFilaPoliza(poliza, form, 4);
-                                dibujarFilaPoliza(poliza, form, 8);
+                                dibujarFilaPoliza(polizaCopia, form, 4);
+                                dibujarFilaPoliza(polizaCopia, form, 8);
                             end;
                             5:
                             begin
-                                editarFechaPoliza(poliza.fecha.vigenciaDesde, form, 5, confirmado, poliza);
+                                editarFechaPoliza(polizaCopia.fecha.vigenciaDesde, form, 5, confirmado, polizaCopia);
                                 if confirmado then
-                                begin
-                                    poliza.valorCuota := valorCuota(poliza);
-                                    escribirArchivoPolizas(fPol, indiceRegistro, poliza);
-                                end;
-                                dibujarFilaPoliza(poliza, form, 5);
-                                dibujarFilaPoliza(poliza, form, 8);
+                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                dibujarFilaPoliza(polizaCopia, form, 5);
+                                dibujarFilaPoliza(polizaCopia, form, 8);
                             end;
                             6:
                             begin
-                                editarFechaPoliza(poliza.fecha.vigenciaHasta, form, 6, confirmado, poliza);
+                                editarFechaPoliza(polizaCopia.fecha.vigenciaHasta, form, 6, confirmado, polizaCopia);
                                 if confirmado then
-                                begin
-                                    poliza.valorCuota := valorCuota(poliza);
-                                    escribirArchivoPolizas(fPol, indiceRegistro, poliza);
-                                end;
-                                dibujarFilaPoliza(poliza, form, 6);
-                                dibujarFilaPoliza(poliza, form, 7);
+                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                dibujarFilaPoliza(polizaCopia, form, 6);
+                                dibujarFilaPoliza(polizaCopia, form, 8);
                             end;
-                            7:
+                            8:
                             begin
+                                poliza := polizaCopia;
+                                escribirArchivoPolizas(fPol, indiceRegistro, poliza);
                                 salir := true;
                             end;
                         end;
@@ -1322,10 +1322,22 @@ implementation
             salir, confirmado : Boolean;
         begin
             registrado := false;
-            inicializarPoliza(poliza);
+            FillChar(poliza, SizeOf(poliza), #0);
             poliza.numPol := generarNumeroDePoliza(fPol, FileSize(fPol));
             poliza.DNI := dni;
             poliza.patente := patente;
+            poliza.yearVehicle := 1800;
+            poliza.estado := true;
+            poliza.fecha.carga.D := 1; 
+            poliza.fecha.carga.M := 1; 
+            poliza.fecha.carga.A := 2026;
+            poliza.fecha.vigenciaDesde.D := 1; 
+            poliza.fecha.vigenciaDesde.M := 1; 
+            poliza.fecha.vigenciaDesde.A := 2026;
+            poliza.fecha.vigenciaHasta.D := 1; 
+            poliza.fecha.vigenciaHasta.M := 2; 
+            poliza.fecha.vigenciaHasta.A := 2026;
+            poliza.cobertura := terceroCompleto;
 
             inicializarFormularioPoliza(form, modoAltaPoliza);
             salir := false;
@@ -1420,11 +1432,10 @@ implementation
                             agregarOpcion(menuOpciones, 'Dar de baja')
                         else
                             agregarOpcion(menuOpciones, 'Dar de alta');
-                        agregarOpcion(menuOpciones, 'Volver');
                         
                         seleccionOpcion := 1;
 
-                        menuHorizontal('Seleccione una opcion para la poliza', menuOpciones, seleccionOpcion, 30, 1, 0, 11);
+                        menuHorizontal('Seleccione una opcion para la poliza', menuOpciones, seleccionOpcion, 34, 1, 0, 11);
                         limpiarConsolaEn(menuOpciones.ventana);
 
                         case seleccionOpcion of
@@ -1451,10 +1462,6 @@ implementation
                                     poliza.estado := not poliza.estado;
                                     escribirArchivoPolizas(fPol, indiceRegistro, poliza);
                                 end;
-                            end;
-                            3:
-                            begin
-                                salir := true;
                             end;
                         end;
                         
@@ -1556,5 +1563,4 @@ implementation
 
         until seleccion = -1;
     end;
-
 end.

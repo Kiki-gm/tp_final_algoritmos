@@ -50,12 +50,41 @@ implementation
         Write(f,data);
     end;
 
+    procedure ordenarArchivoClientesPorDNI(var f : tArchivoClientes);
+    var
+        i, j, l : Integer;
+        c1, c2 : datosCliente;
+        swap : Boolean;
+    begin
+        l := ultimaLineaArchivoClientes(f);
+        i := 0;
+        swap := true;
+
+        while (i < n) and swap do
+        begin
+            swap := false;
+            for j := 0 to (l - i - 1) do
+            begin
+                leerArchivoClientes(f, j, c1);
+                leerArchivoClientes(f, j + 1, c2);
+
+                if c1.DNI > c2.DNI then
+                begin
+                    escribirArchivoClientes(f, j, c2);
+                    escribirArchivoClientes(f, j + 1, c1);
+                    swap := true;
+                end;
+            end;
+            Inc(i);
+        end;
+    end;
+
     procedure agregarCliente(var f : tArchivoClientes; c : datosCliente);
     begin
-        Seek(f, FileSize(f));
-        Write(f,c);
+        escribirArchivoClientes(f, fileSize(f), c);
+        ordenarArchivoClientesPorDNI(f);
     end;
-    
+
     function ultimaLineaArchivoClientes(var f : tArchivoClientes): Integer;
     begin
         ultimaLineaArchivoClientes := FileSize(f) - 1;

@@ -1251,7 +1251,7 @@ implementation
                         if a > 2026 then
                         begin
                             esValido := false;
-                            errorMsg := 'Anio de vigencia desde no puede ser mayor a 2026'; //ñoño
+                            errorMsg := 'Año de vigencia desde no puede ser mayor a 2026'; //gracias me habia olvidado de la ñ aca
                         end;
                     end
                     else if tipoFila = 6 then

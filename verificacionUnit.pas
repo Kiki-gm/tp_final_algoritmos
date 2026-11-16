@@ -207,10 +207,10 @@ implementation
     begin
         temp := fullname;
 
-        while (Ord(temp[1]) <= 32) and (Length(temp) > 0) do
+        while (Length(temp) > 0) and (Ord(temp[1]) <= 32) do
             delete(temp,1,1);
         
-        while (Ord(temp[Length(temp)]) <= 32) and (Length(temp) > 0) do
+        while (Length(temp) > 0) and (Ord(temp[Length(temp)]) <= 32) do
             delete(temp,Length(temp),1);
 
         suprimirEspacios := temp;
@@ -219,43 +219,67 @@ implementation
     procedure verificarNombre(fullname : tApellidoYNombres; var valid : boolean; var error : String);
     var
         i : integer;
+        spaceFound : Boolean;
+
+        function esCaracterNombre(c : Char) : Boolean;
+        begin                        { ' }
+            esCaracterNombre := ((c = #39) or (c = '-') or (c = '`') or (c = '^'));
+        end;
+
     begin
         valid := true;
-        error := 'eeeeh ta mal pipo ingresalo denuevo';
+        spaceFound := false;
 
-        for i := 1 to length(fullname) do 
+        if Length(fullname) < 2 then
         begin
-            //Si hay más de un espacio vacío consecutivo, o uno a los bordes, falso.
-            if (fullname[i] = ' ') and (i <> Length(fullname)) then 
-            begin
-                if fullname[i+1] = ' ' then
-                    valid := False; 
-                if (i = 1) then 
-                    valid := False;
-            end 
-            else if ((fullname[i]) = ' ') then
-                valid := False;  
-
-            //Si un ' o un - se repite consecutivamente, o uno al inicio o al final; o bien el caracter no es ni una letra ni ' o -, falso.
-            if ((fullname[i] < 'a') or (fullname[i] > 'z')) and ((fullname[i] < 'A') or (fullname[i] > 'Z')) then                             
-            begin
-                if ((ord(fullname[i]) = 39) or (fullname[i] = '-')) then
+            valid := false;
+            error := 'Nombre ingresado muy corto';
+        end
+        else
+        begin
+            for i := 1 to Length(fullname) do 
+            begin              
+                if esCaracterNombre(fullname[i]) then
                 begin
-                    if ((ord(fullname[i]) = 39) or (fullname[i] = '-')) and (i < Length(fullname)) then 
+                    if (i = 1) or (i = Length(fullname)) then
                     begin
-                        if (ord(fullname[i+1]) = 39) or (fullname[i+1] = '-') or (fullname[i+1] = ' ') then
-                            valid := False;
-                        if (i > 1) and (fullname[i] = '-') then 
-                            if ((fullname[i-1] < 'a') or (fullname[i-1] > 'z')) and ((fullname[i-1] < 'A') or (fullname[i-1] > 'Z')) then
-                              valid := False;
-                        if (i = 1) then 
-                            valid := False;
-                    end 
-                    else if (ord(fullname[i]) = 39) or (fullname[i] = '-') then
-                            valid := False;   
+                        valid := false;
+                        error := 'Caracteres sin letras precedentes o consecuentes';
+                    end
+                    else
+                    begin
+                        if (esCaracterNombre(fullname[i+1])) or (esCaracterNombre(fullname[i-1])) then
+                        begin
+                            valid := false;
+                            error := 'Doble caracter junto';
+                        end;
+                    end;
                 end
-                else if fullname[i] <> ' ' then
-                    valid := False;
+                else if (fullname[i] = ' ') then
+                begin
+                    spaceFound := true;
+                    if (i <= 2) then
+                    begin
+                        valid := false;
+                        error := 'Nombre ingresado no valido';
+                    end;
+                    if (i >= (Length(fullname) - 1)) then
+                    begin
+                        valid := false;
+                        error := 'Apellido ingresado no valido';
+                    end;
+                end
+                else if not esLetra(fullname[i]) then
+                begin
+                    valid := false;
+                    error := 'Caracter ingresado no valido';
+                end;
+            end;
+            
+            if not spaceFound then
+            begin
+                valid := false;
+                error := 'Falta nombre o apellido';
             end;
         end;
     end;
@@ -265,7 +289,6 @@ implementation
         i : integer;
     begin
         valid := True;  
-        error := 'eeeeh ta mal pipo ingresalo denuevo';
 
         for i := 1 to length(address) do
         begin
@@ -305,17 +328,17 @@ implementation
                     end
                     
                     //Pero es un número, que no esté precedido por nada que no sea ", -, un espacio, u otro número, y que sólo esté seguido por un número o un espacio.
-                    else if (address[i] >= '1') and (address[i] <= '9') then
+                    else if esNumero(address[i]) then
                     begin
                         if (i > 1) then
                         begin
-                            if (not (address[i-1] >= '1')) and (not (address[i-1] <= '9')) and ((address[i-1] <> ' ') or (address[i-1] <> '"') or (address[i-1] <> '-')) then 
+                            if (not esNumero(address[i-1])) and ((address[i-1] <> ' ') or (address[i-1] <> '"') or (address[i-1] <> '-')) then 
                                 valid := False;
                         end; 
                         
                         if i < length(address) then
                         begin
-                            if (not (address[i+1] >= '1')) and (not (address[i+1] <= '9')) and ((address[i+1] <> ' ')) then
+                            if (not esNumero(address[i+1])) and ((address[i+1] <> ' ')) then
                                 valid := False; 
                         end;
                     end 
@@ -329,37 +352,33 @@ implementation
     procedure verificarCel(phoneNum : tCelular; var valid : boolean; var error : String);
     begin
         valid := True;
-        error := 'eeeeh ta mal pipo ingresalo denuevo';
-
-        if length(phoneNum) > 21 then //Incluendo prefijos y no sé qué no sé cuánto, este debería ser el largo máximo en el mundo.
-            valid := False;
+        if (Length(phoneNum) > 21) or (Length(phoneNum) < 8) then
+        begin
+            valid := False; //Incluendo prefijos y no sé qué no sé cuánto, este debería ser el largo máximo en el mundo.
+            error := 'Numero ingresado no valido';
+        end; 
     end;
 
-    {1. Evitar repeticion de @ y la existencia de @ al final. 
-     2. Evitar uso de espacios
-     3. hacer que sea necesario tener una @, seguida de algun tipo de sufijo, como gmail.com, hotmail.com., yahoo.com 
-    }
     procedure verificarEmail(mail : tEmail; var valid : boolean; var error : String);
     var 
-        temp1, temp2, i : integer;
-        temp3 : String;
+        i : integer;
+        temp : String;
+        atFound : Boolean;
     begin
         valid := True;
-        error := 'eeeeh ta mal pipo ingresalo denuevo';
+        atFound := false;
 
         for i := 1 to Length(mail) do 
         begin
-            //Si hay más de un espacio vacío consecutivo, o uno a los bordes, falso.
-            if (mail[i] = ' ') and (i <> length(mail)) then 
+            if mail[i] = ' ' then
             begin
-                if mail[i+1] = ' ' then
-                    valid := False; 
-                if (i = 1) then 
-                    valid := False;
-            end 
-            else if (mail[i]) = ' ' then
-                    valid := False; 
+                valid := false;
+                error := 'No se permiten espacios en los correos electronicos';
+            end;
             
+            if (mail[i] = '@') then
+                atFound := true;
+
             {Si hay más de una @ consecutiva, o una a los bordes, falso.
             Además, busqué los sufijos de email más comunes del mundo. Si el sufijo usado no es uno de ellos, falso. 
             Evidentemente, hay formas más sofisticadas de hacer esto.}
@@ -377,14 +396,11 @@ implementation
                 end
                 else
                 begin
-                    temp1 := i+1;
-                    temp2 := length(mail) - i+1;
-                    temp3 := copy(mail,temp1,temp2);
+                    temp := copy(mail,(i+1),(Length(mail) - i));
 
-                    if (temp3 <> 'gmail.com') and 
-                       (temp3 <> 'hotmail.com') and
-                       (temp3 <> 'email.com') and
-                       (temp3 <> 'yahoo.com') then
+                    if (temp <> 'gmail.com') and 
+                       (temp <> 'hotmail.com') and
+                       (temp <> 'yahoo.com') then
                     begin
                         valid := False;
                         error := 'Dominio ingresado no valido';  
@@ -397,20 +413,73 @@ implementation
                 error := 'Dominio no ingresado';
             end;
         end;
+
+        if not atFound then
+        begin
+            valid := false;
+            error := 'Falta @';
+        end;
     end;
 
     procedure verificarMarca(brand : tMarca; var valid : boolean; var error : String);
+    var temp : String;
     begin
         valid := true;
+        temp := LowerCase(brand);
+
+        if (temp <> 'fiat') and
+           (temp <> 'peugeot') and
+           (temp <> 'citroen') and
+           (temp <> 'jeep') and
+           (temp <> 'toyota') and
+           (temp <> 'chevrolet') and
+           (temp <> 'volkswagen') and
+           (temp <> 'hyundai') and
+           (temp <> 'kia') and
+           (temp <> 'nissan') and
+           (temp <> 'renault') and
+           (temp <> 'suzuki') and
+           (temp <> 'ford') and
+           (temp <> 'honda') and
+           (temp <> 'mazda') and
+           (temp <> 'changan') then
+        begin
+            valid := false;
+            error := 'Marca no registrada';
+        end;
     end;
 
     procedure verificarModelo(model : tModelo; var valid : boolean; var error : String);
+    var i : Word;
     begin
         valid := true;
+
+        if Length(model) < 2 then
+        begin
+            valid := false;
+            error := 'Nombre de modelo muy corto';
+        end
+        else
+        begin
+            for i := 1 to Length(model) do
+            begin
+                if (not esNumero(model[i])) and (not esLetra(model[i])) then
+                begin
+                    valid := false;
+                    error := 'El modelo ingreasdo lleva caracteres especiales';
+                end;
+            end;
+        end;
     end;
 
     procedure verificarYearVehicle(yearVehicle : Word; var valid : boolean; var error : String);
     begin
         valid := true;
+
+        if yearVehicle <= 1800 then
+        begin
+            valid := false;
+            error := 'Año ingresado no valido'
+        end;
     end;
 end.

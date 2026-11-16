@@ -86,7 +86,7 @@ implementation
                 if searched = temp.DNI then
                     pos := mid
                 else if searched < temp.DNI then
-                    fin := mid - 1 
+                    fin := mid - 1
                 else 
                     ini := mid + 1;
             end;

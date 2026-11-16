@@ -22,10 +22,10 @@ interface
             estado : tEstado;
         end;
 
-    procedure inicializarPoliza(var p : datosPoliza);
+    procedure inicializarPoliza(var poliza : datosPoliza);
 
 implementation
-    procedure inicializarPoliza(var p : datosPoliza);
+    procedure inicializarPoliza(var poliza : datosPoliza);
     begin
         p.yearVehicle := 2000;
         p.estado := true;

@@ -466,7 +466,7 @@ implementation
                 if (not esNumero(model[i])) and (not esLetra(model[i])) then
                 begin
                     valid := false;
-                    error := 'El modelo ingreasdo lleva caracteres especiales';
+                    error := 'El modelo ingresado lleva caracteres especiales';
                 end;
             end;
         end;

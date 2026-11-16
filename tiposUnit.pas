@@ -17,7 +17,8 @@ type
     tipoCobertura = (responsabilidadCivil, incendioYRoboTotal, incendioYRoboTotalYParcial, terceroCompleto, todoRiesgo); 
     tPatente = String[7];
     tEstado = Boolean;
-
+    tMarca = String[20];
+    tModelo = String[40];
 
 
 implementation

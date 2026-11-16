@@ -299,7 +299,7 @@ implementation
         else
             altoMinimo := altoMinimo + 6;
 
-        if (anchoMinimo > (bottomRight.x - 42)) and (altoMinimo > (bottomRight.y - 8)) then
+        if (anchoMinimo > (bottomRight.x - 24)) and (altoMinimo > (bottomRight.y - 8)) then
             dimensionesValidas := false
         else
             dimensionesValidas := true;

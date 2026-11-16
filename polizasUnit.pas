@@ -27,17 +27,17 @@ interface
 implementation
     procedure inicializarPoliza(var p : datosPoliza);
     begin
-        poliza.yearVehicle := 2000;
-        poliza.estado := true;
-        poliza.fecha.carga.D := 1; 
-        poliza.fecha.carga.M := 1; 
-        poliza.fecha.carga.A := 2026;
-        poliza.fecha.vigenciaDesde.D := 1; 
-        poliza.fecha.vigenciaDesde.M := 1; 
-        poliza.fecha.vigenciaDesde.A := 2026;
-        poliza.fecha.vigenciaHasta.D := 1; 
-        poliza.fecha.vigenciaHasta.M := 2; 
-        poliza.fecha.vigenciaHasta.A := 2026;
-        poliza.cobertura := terceroCompleto;
+        p.yearVehicle := 2000;
+        p.estado := true;
+        p.fecha.carga.D := 1; 
+        p.fecha.carga.M := 1; 
+        p.fecha.carga.A := 2026;
+        p.fecha.vigenciaDesde.D := 1; 
+        p.fecha.vigenciaDesde.M := 1; 
+        p.fecha.vigenciaDesde.A := 2026;
+        p.fecha.vigenciaHasta.D := 1; 
+        p.fecha.vigenciaHasta.M := 2; 
+        p.fecha.vigenciaHasta.A := 2026;
+        p.cobertura := terceroCompleto;
     end;
 end.

@@ -424,6 +424,7 @@ implementation
                     copia.fechaDeNacimiento.D := d;
                     copia.fechaDeNacimiento.M := m;
                     copia.fechaDeNacimiento.A := a;
+                    confirmado := true;
                 end;
             until confirmado or (k = escape);
 
@@ -872,10 +873,10 @@ implementation
                 confirmado := true;
         end;
 
-        procedure editarYearVehiclePoliza(var yearV : Integer; var form : registroFormularioPoliza; tipoFila : Integer; var confirmado : Boolean; var polizaRef : datosPoliza);
+        procedure editarYearVehiclePoliza(var yearV : Word; var form : registroFormularioPoliza; tipoFila : Integer; var confirmado : Boolean; var polizaRef : datosPoliza);
         var
             k : tecla;
-            yearOriginal : Integer;
+            yearOriginal : Word;
         begin
             yearOriginal := yearV;
             form.editandoTexto := true;

@@ -244,7 +244,7 @@ implementation
                     if (i = 1) or (i = Length(fullname)) then
                     begin
                         valid := false;
-                        error := 'Caracteres sin letras precedentes o consecuentes';
+                        error := 'Caracteres especiales sin letras precedentes o consecuentes';
                     end
                     else
                     begin
@@ -258,10 +258,15 @@ implementation
                 else if (fullname[i] = ' ') then
                 begin
                     spaceFound := true;
-                    if (i <= 2) then
+                    if (i <= 2)  then
                     begin
                         valid := false;
                         error := 'Nombre ingresado no valido';
+                    end
+                    else if (i < length(fullname)) and (fullname[i+1] = ' ') then
+                    begin
+                        valid := false;
+                        error := 'Doble espacio junto';
                     end;
                     if (i >= (Length(fullname) - 1)) then
                     begin
@@ -287,29 +292,53 @@ implementation
     procedure verificarDireccion(address : tDireccion; var valid : boolean; var error : String); //Esta es media rara. Habría que verla en conjunto.
     var
         i : integer;
+        spaceFound : Boolean;
+
+        function esCaracterDireccion(c : Char) : Boolean;
+        begin
+            esCaracterDireccion := ((c = #39) or (c = '-') or (c = '`') or (c = '^') or (c = '"') or (c = ' '));
+        end;
+
     begin
-        valid := True;  
+        valid := true;
+        spaceFound := false;
 
         for i := 1 to length(address) do
         begin
-            //Que no se pasen de atrevidos con los espacios
-            if (address[i] = ' ') and (i <> Length(address)) then 
+            //Que no se pasen de atrevidos con los espacios y los caracteres especiales.
+            if esCaracterDireccion(address[i]) then
             begin
-                if address[i+1] = ' ' then
-                    valid := False; 
-                if (i = 1) then 
-                    valid := False;
-            end 
-            else if (address[i]) = ' ' then
-                valid := False;  
+                if (i = 1) or (i = Length(address)) and (not (address[i] = #39)) and (not (address[i] = '"')) then //' y " pueden llegar a usaarse en ciertos lugares, por lo que tienen derechos extra.
+                begin
+                    valid := false;
+                    error := 'Caracteres especiales sin letras precedentes o consecuentes';
+                end
+                else
+                begin
+                    if (esCaracterDireccion(address[i+1])) or (esCaracterDireccion(address[i-1])) then
+                    begin
+                        valid := false;
+                        error := 'Doble caracter junto';
+                    end;
+                end;
+            end
+            else if (address[i] = ' ') then
+                begin
+                    spaceFound := true;
+                    if (i = 1) or (i >= (Length(address) - 1)) then
+                    begin
+                        valid := false;
+                        error := 'Direccion ingresada no valida';
+                    end;
+                end;
 
             //Si no es una letra...
-            if ((address[i] < 'a') or (address[i] > 'z')) and ((address[i] < 'A') or (address[i] > 'Z')) then                             
+            if not esLetra(address[i]) then                             
                 begin
                     //Pero es una ', - o una ", que no haya más de una consecutiva, y que no hayan ' ni - a los extremos
-                    if ((ord(address[i]) = 39) or (address[i] = '-') or (address[i] = '"')) then
+                    if (address[i] = #39) or (address[i] = '-') or (address[i] = '"') then
                     begin
-                        if ((ord(address[i]) = 39) or (address[i] = '-') or (address[i] = '"')) and (i < Length(address)) then 
+                        if (address[i] = #39) or (address[i] = '-') or (address[i] = '"') and (i < Length(address)) then 
                         begin
                             if (i = 1) and (not (address[i] = '"')) then 
                                 valid := False;
@@ -332,19 +361,24 @@ implementation
                     begin
                         if (i > 1) then
                         begin
-                            if (not esNumero(address[i-1])) and ((address[i-1] <> ' ') or (address[i-1] <> '"') or (address[i-1] <> '-')) then 
+                            if (not esNumero(address[i-1])) and ((address[i-1] <> ' ')) then 
                                 valid := False;
+                                error := 'Direccion ingresada no valida1';
                         end; 
                         
                         if i < length(address) then
                         begin
                             if (not esNumero(address[i+1])) and ((address[i+1] <> ' ')) then
                                 valid := False; 
+                                error := 'Direccion ingresada no valida2';
                         end;
                     end 
 
                     else if address[i] <> ' ' then
+                    begin
                         valid := False;
+                        error := 'Direccion ingresada no valida';
+                    end;
             end;  
         end; 
     end;

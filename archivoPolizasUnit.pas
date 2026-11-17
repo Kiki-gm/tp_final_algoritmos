@@ -100,7 +100,7 @@ implementation
          final, según el día de comienzo y de fin}
         diasMesIni := diasDelMes(poliza.fecha.vigenciaDesde.M,poliza.fecha.vigenciaDesde.A);
         diasMesFin := diasDelMes(poliza.fecha.vigenciaHasta.M,poliza.fecha.vigenciaHasta.A);
-        mesesExactos := contM - (1/diasMesIni * tempD1) - ((1/diasMesFin) * (diasMesFin - tempD2));
+        mesesExactos := contM - (1/diasMesIni * (tempD1 - 1)) - ((1/diasMesFin) * (diasMesFin - (tempD2-1)));
     
         valorCuota := tempTotal/mesesExactos; //Considerar que internamente, se suele trabajar con 6 decimales en las empresas de pólizas.
     end;

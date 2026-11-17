@@ -28,8 +28,9 @@ interface
     procedure verificarEmail(mail : tEmail; var valid : boolean; var error : String);
 
     procedure verificarMarca(brand : tMarca; var valid : boolean; var error : String);
-    procedure verificarModelo(model : tModelo; var valid : boolean; var error : String);
-    procedure verificarYearVehicle(yearVehicle : Word; var valid : boolean; var error : String);
+    procedure verificarModelo(model : tModelo; brand : tMarca; var valid : boolean; var error : String);
+    procedure verificarYearVehicle(yearVehicle : Word; model : String; var valid : boolean; var error : String);
+
     
 implementation
 
@@ -449,37 +450,316 @@ implementation
         end;
     end;
 
-    procedure verificarModelo(model : tModelo; var valid : boolean; var error : String);
-    var i : Word;
+    procedure verificarModelo(model : tModelo; brand : tMarca; var valid : boolean; var error : String);
+    var b,m : String;
     begin
-        valid := true;
+        valid := false;
+        error := 'Modelo no asegurado';
+        b := LowerCase(brand);
+        m := LowerCase(model);
 
-        if Length(model) < 2 then
-        begin
-            valid := false;
-            error := 'Nombre de modelo muy corto';
-        end
-        else
-        begin
-            for i := 1 to Length(model) do
+        case b of
+            'fiat':
             begin
-                if (not esNumero(model[i])) and (not esLetra(model[i])) then
-                begin
-                    valid := false;
-                    error := 'El modelo ingresado lleva caracteres especiales';
+                case m of
+                    'cronos': valid := true;
+                    'palio': valid := true;
+                    'uno': valid := true;
+                    'siena': valid := true;
+                    'toro': valid := true;
+                    'strada': valid := true;
+                end;
+            end;
+            'peugeot':
+            begin
+                case m of
+                    '208': valid := true;
+                    '206': valid := true;
+                    '207 compact': valid := true;
+                    'partner': valid := true;
+                    '308': valid := true;
+                    '2008': valid := true;
+                end;
+            end;
+            'citroen':
+            begin
+                case m of
+                    'c3': valid := true;
+                    'Berlingo': valid := true;
+                    'c4 cactus': valid := true;
+                    'c4 lounge': valid := true;
+                    'c3 aircross': valid := true;
+                    'basalt': valid := true;
+                end;
+            end;
+            'jeep':
+            begin
+                case m of
+                    'renegade': valid := true;
+                    'compass': valid := true;
+                    'commander': valid := true;
+                    'grand cherokee': valid := true;
+                    'cherokee': valid := true;
+                    'wrangler': valid := true;
+                end;
+            end;
+            'toyota':
+            begin
+                case m of
+                    'hilux': valid := true;
+                    'corola': valid := true;
+                    'etios': valid := true;
+                    'yaris': valid := true;
+                    'corola cross': valid := true;
+                    'yaris cross': valid := true;
+                    'sw4': valid := true;
+                end;
+            end;
+            'chevrolet':
+            begin
+                case m of
+                    'corsa': valid := true;
+                    'classic': valid := true;
+                    'onix': valid := true;
+                    'tracker': valid := true;
+                    'cruze': valid := true;
+                    's10': valid := true;
+                    'prisma': valid := true;
+                end;
+            end;
+            'volkswagen':
+            begin
+                case m of
+                    'gol': valid := true;
+                    'amarok': valid := true;
+                    'suran': valid := true;
+                    'polo': valid := true;
+                    't-cross': valid := true;
+                    'tera': valid := true;
+                    'taos': valid := true;
+                end;
+            end;
+            'hyundai':
+            begin
+                case m of
+                    'tucson': valid := true;
+                    'creta': valid := true;
+                    'hb20': valid := true;
+                    'santa fe': valid := true;
+                    'i10': valid := true;
+                    'grand i10': valid := true;
+                    'h1': valid := true;
+                end;
+            end;
+            'kia':
+            begin
+                case m of
+                    'sportage': valid := true;
+                    'cerato': valid := true;
+                    'k3': valid := true;
+                    'rio': valid := true;
+                    'seltos': valid := true;
+                    'sorento': valid := true;
+                end;
+            end;
+            'nissan':
+            begin
+                case m of
+                    'frontier': valid := true;
+                    'kicks': valid := true;
+                    'versa': valid := true;
+                    'march': valid := true;
+                    'note': valid := true;
+                    'sentra': valid := true;
+                end;
+            end;
+            'renault':
+            begin
+                case m of
+                    'kangoo': valid := true;
+                    'sandero': valid := true;
+                    'clio': valid := true;
+                    'duster': valid := true;
+                    'logan': valid := true;
+                    'kardian': valid := true;
+                end;
+            end;
+            'suzuki':
+            begin
+                case m of
+                    'ax 100': valid := true;                // moto
+                    'gn 125': valid := true;                // moto
+                    'gixxer 150': valid := true;            // moto
+                    'fun': valid := true;
+                    'vitara': valid := true;
+                    'grand vitara': valid := true;
+                    'switf': valid := true;
+                end;
+            end;
+            'ford':
+            begin
+                case m of
+                    'ranger': valid := true;
+                    'ecosport': valid := true;
+                    'ka': valid := true;
+                    'fiesta': valid := true;
+                    'focus': valid := true;
+                    'territory': valid := true;
+                end;
+            end;
+            'honda':
+            begin
+                case m of
+                    'wave 110': valid := true;              // moto
+                    'cg 150 titan': valid := true;          // moto
+                    'glh 150': valid := true;               // moto
+                    'xr 150l': valid := true;               // moto
+                    'xr 250 tornado': valid := true;        // moto
+                    'hr-v': valid := true;
+                    'cr-v': valid := true;
+                    'civic': valid := true;
+                    'fit': valid := true;
+                end;
+            end;
+            'mazda':
+            begin
+                case m of   
+                    '323': valid := true;
+                    '626': valid := true;
+                    'b2500': valid := true;
+                    'b2900': valid := true;
+                    'mx-3': valid := true;
+                    'mx-5 miata': valid := true;
+                    'mpv': valid := true;
+                end;
+            end;
+            'changan':
+            begin
+                case m of   
+                    'cs55 plus': valid := true;
+                    'cs15': valid := true;
+                    'cs35 plus': valid := true;
+                    'eado plus': valid := true;
+                    'hunter': valid := true;
+                    'md201': valid := true;
+                    'star': valid := true;
                 end;
             end;
         end;
     end;
 
-    procedure verificarYearVehicle(yearVehicle : Word; var valid : boolean; var error : String);
+    procedure verificarYearVehicle(yearVehicle : Word; model : String; var valid : boolean; var error : String);
     begin
-        valid := true;
+        valid := false;
+        error := 'Año del vehiculo incorrecto/invalido';
 
-        if yearVehicle <= 1800 then
-        begin
-            valid := false;
-            error := 'Año ingresado no valido'
+        case model of
+            'cronos':         if ((yearVehicle <= 2026) and (yearVehicle >= 2018)) then valid := true;
+            'palio':          if ((yearVehicle <= 2018) and (yearVehicle >= 1996)) then valid := true;
+            'uno':            if ((yearVehicle <= 2021) and (yearVehicle >= 1983)) then valid := true;
+            'siena':          if ((yearVehicle <= 2016) and (yearVehicle >= 1996)) then valid := true;
+            'toro':           if ((yearVehicle <= 2026) and (yearVehicle >= 2016)) then valid := true;
+            'strada':         if ((yearVehicle <= 2026) and (yearVehicle >= 1998)) then valid := true;
+            '208':            if ((yearVehicle <= 2026) and (yearVehicle >= 2012)) then valid := true;
+            '206':            if ((yearVehicle <= 2012) and (yearVehicle >= 1998)) then valid := true;
+            '207 compact':    if ((yearVehicle <= 2016) and (yearVehicle >= 2008)) then valid := true;
+            'partner':        if ((yearVehicle <= 2026) and (yearVehicle >= 1996)) then valid := true;
+            '308':            if ((yearVehicle <= 2026) and (yearVehicle >= 2007)) then valid := true;
+            '2008':           if ((yearVehicle <= 2026) and (yearVehicle >= 2013)) then valid := true;
+            'c3':             if ((yearVehicle <= 2026) and (yearVehicle >= 2002)) then valid := true;
+            'Berlingo':       if ((yearVehicle <= 2026) and (yearVehicle >= 1996)) then valid := true;
+            'c4 cactus':      if ((yearVehicle <= 2024) and (yearVehicle >= 2014)) then valid := true;
+            'c4 lounge':      if ((yearVehicle <= 2021) and (yearVehicle >= 2013)) then valid := true;
+            'c3 aircross':    if ((yearVehicle <= 2026) and (yearVehicle >= 2010)) then valid := true;
+            'basalt':         if ((yearVehicle <= 2026) and (yearVehicle >= 2024)) then valid := true;
+            'renegade':       if ((yearVehicle <= 2026) and (yearVehicle >= 2014)) then valid := true;
+            'compass':        if ((yearVehicle <= 2026) and (yearVehicle >= 2006)) then valid := true;
+            'commander':      if ((yearVehicle <= 2026) and (yearVehicle >= 2021)) then valid := true;
+            'grand cherokee': if ((yearVehicle <= 2026) and (yearVehicle >= 1992)) then valid := true;
+            'cherokee':       if ((yearVehicle <= 2023) and (yearVehicle >= 1974)) then valid := true;
+            'wrangler':       if ((yearVehicle <= 2026) and (yearVehicle >= 1986)) then valid := true;
+            'hilux':          if ((yearVehicle <= 2026) and (yearVehicle >= 1968)) then valid := true;
+            'corola':         if ((yearVehicle <= 2026) and (yearVehicle >= 1966)) then valid := true;
+            'etios':          if ((yearVehicle <= 2023) and (yearVehicle >= 2010)) then valid := true;
+            'yaris':          if ((yearVehicle <= 2026) and (yearVehicle >= 1999)) then valid := true;
+            'corola cross':   if ((yearVehicle <= 2026) and (yearVehicle >= 2020)) then valid := true;
+            'yaris cross':    if ((yearVehicle <= 2026) and (yearVehicle >= 2023)) then valid := true;
+            'sw4':            if ((yearVehicle <= 2026) and (yearVehicle >= 1984)) then valid := true;
+            'corsa':          if ((yearVehicle <= 2016) and (yearVehicle >= 1993)) then valid := true;
+            'classic':        if ((yearVehicle <= 2016) and (yearVehicle >= 1993)) then valid := true;
+            'onix':           if ((yearVehicle <= 2026) and (yearVehicle >= 2012)) then valid := true;
+            'tracker':        if ((yearVehicle <= 2026) and (yearVehicle >= 2012)) then valid := true;
+            'cruze':          if ((yearVehicle <= 2023) and (yearVehicle >= 2008)) then valid := true;
+            's10':            if ((yearVehicle <= 2026) and (yearVehicle >= 1981)) then valid := true;
+            'prisma':         if ((yearVehicle <= 2019) and (yearVehicle >= 2006)) then valid := true;
+            'gol':            if ((yearVehicle <= 2023) and (yearVehicle >= 1980)) then valid := true;
+            'amarok':         if ((yearVehicle <= 2026) and (yearVehicle >= 2010)) then valid := true;
+            'suran':          if ((yearVehicle <= 2019) and (yearVehicle >= 2006)) then valid := true;
+            'polo':           if ((yearVehicle <= 2026) and (yearVehicle >= 1975)) then valid := true;
+            't-cross':        if ((yearVehicle <= 2026) and (yearVehicle >= 2018)) then valid := true;
+            'tera':           if ((yearVehicle <= 2026) and (yearVehicle >= 2025)) then valid := true;
+            'taos':           if ((yearVehicle <= 2026) and (yearVehicle >= 2020)) then valid := true;
+            'tucson':         if ((yearVehicle <= 2026) and (yearVehicle >= 2004)) then valid := true;
+            'creta':          if ((yearVehicle <= 2026) and (yearVehicle >= 2014)) then valid := true;
+            'hb20':           if ((yearVehicle <= 2026) and (yearVehicle >= 2012)) then valid := true;
+            'santa fe':       if ((yearVehicle <= 2026) and (yearVehicle >= 2000)) then valid := true;
+            'i10':            if ((yearVehicle <= 2026) and (yearVehicle >= 2007)) then valid := true;
+            'grand i10':      if ((yearVehicle <= 2026) and (yearVehicle >= 2007)) then valid := true;
+            'h1':             if ((yearVehicle <= 2021) and (yearVehicle >= 1997)) then valid := true;
+            'sportage':       if ((yearVehicle <= 2026) and (yearVehicle >= 1993)) then valid := true;
+            'cerato':         if ((yearVehicle <= 2024) and (yearVehicle >= 2003)) then valid := true;
+            'k3':             if ((yearVehicle <= 2026) and (yearVehicle >= 2023)) then valid := true;
+            'rio':            if ((yearVehicle <= 2023) and (yearVehicle >= 1999)) then valid := true;
+            'seltos':         if ((yearVehicle <= 2026) and (yearVehicle >= 2019)) then valid := true;
+            'sorento':        if ((yearVehicle <= 2026) and (yearVehicle >= 2002)) then valid := true;
+            'frontier':       if ((yearVehicle <= 2026) and (yearVehicle >= 1997)) then valid := true;
+            'kicks':          if ((yearVehicle <= 2026) and (yearVehicle >= 2016)) then valid := true;
+            'versa':          if ((yearVehicle <= 2026) and (yearVehicle >= 2006)) then valid := true;
+            'march':          if ((yearVehicle <= 2023) and (yearVehicle >= 1982)) then valid := true;
+            'note':           if ((yearVehicle <= 2026) and (yearVehicle >= 2004)) then valid := true;
+            'sentra':         if ((yearVehicle <= 2026) and (yearVehicle >= 1982)) then valid := true;
+            'kangoo':         if ((yearVehicle <= 2026) and (yearVehicle >= 1997)) then valid := true;
+            'sandero':        if ((yearVehicle <= 2026) and (yearVehicle >= 2007)) then valid := true;
+            'clio':           if ((yearVehicle <= 2026) and (yearVehicle >= 1990)) then valid := true;
+            'duster':         if ((yearVehicle <= 2026) and (yearVehicle >= 2010)) then valid := true;
+            'logan':          if ((yearVehicle <= 2026) and (yearVehicle >= 2004)) then valid := true;
+            'kardian':        if ((yearVehicle <= 2026) and (yearVehicle >= 2023)) then valid := true;
+            'ax 100':         if ((yearVehicle <= 2026) and (yearVehicle >= 1984)) then valid := true;    // moto
+            'gn 125':         if ((yearVehicle <= 2026) and (yearVehicle >= 1981)) then valid := true;    // moto
+            'gixxer 150':     if ((yearVehicle <= 2026) and (yearVehicle >= 2014)) then valid := true;    // moto
+            'fun':            if ((yearVehicle <= 2011) and (yearVehicle >= 2003)) then valid := true;
+            'vitara':         if ((yearVehicle <= 2026) and (yearVehicle >= 1988)) then valid := true;
+            'grand vitara':   if ((yearVehicle <= 2026) and (yearVehicle >= 1988)) then valid := true;
+            'switf':          if ((yearVehicle <= 2026) and (yearVehicle >= 1983)) then valid := true;
+            'ranger':         if ((yearVehicle <= 2026) and (yearVehicle >= 1983)) then valid := true;
+            'ecosport':       if ((yearVehicle <= 2022) and (yearVehicle >= 2003)) then valid := true;
+            'ka':             if ((yearVehicle <= 2021) and (yearVehicle >= 1996)) then valid := true;
+            'fiesta':         if ((yearVehicle <= 2023) and (yearVehicle >= 1976)) then valid := true;
+            'focus':          if ((yearVehicle <= 2025) and (yearVehicle >= 1998)) then valid := true;
+            'territory':      if ((yearVehicle <= 2026) and (yearVehicle >= 2018)) then valid := true;
+            'wave 110':       if ((yearVehicle <= 2026) and (yearVehicle >= 1995)) then valid := true;    // moto
+            'cg 150 titan':   if ((yearVehicle <= 2026) and (yearVehicle >= 1976)) then valid := true;    // moto
+            'glh 150':        if ((yearVehicle <= 2026) and (yearVehicle >= 1976)) then valid := true;    // moto
+            'xr 150l':        if ((yearVehicle <= 2026) and (yearVehicle >= 2001)) then valid := true;    // moto
+            'xr 250 tornado': if ((yearVehicle <= 2026) and (yearVehicle >= 2001)) then valid := true;    // moto
+            'hr-v':           if ((yearVehicle <= 2026) and (yearVehicle >= 1998)) then valid := true;
+            'cr-v':           if ((yearVehicle <= 2026) and (yearVehicle >= 1995)) then valid := true;
+            'civic':          if ((yearVehicle <= 2026) and (yearVehicle >= 1972)) then valid := true;
+            'fit':            if ((yearVehicle <= 2026) and (yearVehicle >= 2001)) then valid := true;
+            '323':            if ((yearVehicle <= 2003) and (yearVehicle >= 1977)) then valid := true;
+            '626':            if ((yearVehicle <= 2002) and (yearVehicle >= 1978)) then valid := true;
+            'b2500':          if ((yearVehicle <= 2006) and (yearVehicle >= 1961)) then valid := true;
+            'b2900':          if ((yearVehicle <= 2006) and (yearVehicle >= 1961)) then valid := true;
+            'mx-3':           if ((yearVehicle <= 1998) and (yearVehicle >= 1991)) then valid := true;
+            'mx-5 miata':     if ((yearVehicle <= 2026) and (yearVehicle >= 1989)) then valid := true;
+            'mpv':            if ((yearVehicle <= 2016) and (yearVehicle >= 1988)) then valid := true;
+            'cs55 plus':      if ((yearVehicle <= 2026) and (yearVehicle >= 2017)) then valid := true;
+            'cs15':           if ((yearVehicle <= 2024) and (yearVehicle >= 2016)) then valid := true;
+            'cs35 plus':      if ((yearVehicle <= 2026) and (yearVehicle >= 2018)) then valid := true;
+            'eado plus':      if ((yearVehicle <= 2026) and (yearVehicle >= 2012)) then valid := true;
+            'hunter':         if ((yearVehicle <= 2026) and (yearVehicle >= 2019)) then valid := true;
+            'md201':          if ((yearVehicle <= 2026) and (yearVehicle >= 2009)) then valid := true;
+            'star':           if ((yearVehicle <= 2026) and (yearVehicle >= 2009)) then valid := true;
         end;
     end;
 end.

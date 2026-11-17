@@ -692,6 +692,7 @@ implementation
                     ok := false;
             todosCompletadosPoliza := ok;
         end;
+
         procedure escribirFechaPoliza(fecha : tFecha; form : registroFormularioPoliza; campoActual, filaEval : Integer; colorBase : Byte; var ventana : infoVentana);
         var
             pendiente : Boolean;
@@ -763,7 +764,7 @@ implementation
                         escribirSeguido(v, etiquetaCampoPoliza(3), colorBase);
                         if filaActiva and form.editandoTexto then
                             escribirSeguido(v, integerToString(poliza.yearVehicle), Yellow)
-                        else if (form.modo = modoAltaPoliza) and (not form.completados[3]) then
+                        else if (form.modo <> modoVerPoliza) and (not form.completados[3]) then
                             escribirSeguido(v, '<pendiente>', DarkGray)
                         else
                             escribirSeguido(v, integerToString(poliza.yearVehicle), colorBase);
@@ -773,7 +774,7 @@ implementation
                         escribirSeguido(v, etiquetaCampoPoliza(4), colorBase);
                         if filaActiva and form.editandoTexto then
                             escribirSeguido(v, obtenerTextoCobertura(poliza.cobertura), Yellow)
-                        else if (form.modo = modoAltaPoliza) and (not form.completados[4]) then
+                        else if (form.modo <> modoVerPoliza) and (not form.completados[4]) then
                             escribirSeguido(v, '<pendiente>', DarkGray)
                         else
                             escribirSeguido(v, obtenerTextoCobertura(poliza.cobertura), colorBase);
@@ -814,7 +815,10 @@ implementation
                             modoVerPoliza:
                                 escribirSeguido(v, '--- OPCIONES ---', colorBase);
                             modoEditarPoliza:
-                                escribirSeguido(v, '--- GUARDAR CAMBIOS ---', LightGreen);
+                                if todosCompletadosPoliza(form) then
+                                    escribirSeguido(v, '--- GUARDAR CAMBIOS ---', LightGreen)
+                                else
+                                    escribirSeguido(v, '--- GUARDAR CAMBIOS ---', DarkGray);
                             modoAltaPoliza:
                                 if todosCompletadosPoliza(form) then
                                     escribirSeguido(v, '--- CONFIRMAR POLIZA ---', LightGreen)
@@ -835,8 +839,8 @@ implementation
             error := '';
             case campo of
                 1: verificarMarca(poliza.marca, validInput, error);
-                2: verificarModelo(poliza.modelo, validInput, error);
-                3: verificarYearVehicle(poliza.yearVehicle, validInput, error);
+                2: verificarModelo(poliza.modelo, poliza.marca, validInput, error);
+                3: verificarYearVehicle(poliza.yearVehicle, LowerCase(poliza.modelo), validInput, error);
                 4: validInput := true;
             else
                 validInput := true;
@@ -877,6 +881,10 @@ implementation
         var
             k : tecla;
             yearOriginal : Word;
+            esValido : Boolean;
+            errorMsg : String;
+            menuError : registroMenu;
+            seleccionError : Integer;
         begin
             yearOriginal := yearV;
             form.editandoTexto := true;
@@ -891,19 +899,31 @@ implementation
                         if yearV < 2026 then
                             Inc(yearV)
                         else
-                            yearV := 1800;
+                            yearV := 1961;
                     abajo:
-                        if yearV > 1800 then
+                        if yearV > 1961 then
                             Dec(yearV)
                         else
                             yearV := 2026;
+                    enter:
+                    begin
+                        verificarYearVehicle(yearV, LowerCase(polizaRef.modelo), esValido, errorMsg);
+                        if esValido then
+                            confirmado := true
+                        else
+                        begin
+                            inicializarMenu(menuError);
+                            agregarOpcion(menuError, 'Presione enter para continuar');
+                            seleccionError := 1;
+                            menuVertical('Error: ' + errorMsg, menuError, seleccionError, 0, 12);
+                            limpiarConsolaEn(menuError.ventana);
+                        end;
+                    end;
                 end;
             until (k = enter) or (k = escape);
 
             form.editandoTexto := false;
-            if k = enter then
-                confirmado := true
-            else
+            if not confirmado then
                 yearV := yearOriginal;
         end;
 
@@ -1287,16 +1307,19 @@ implementation
             form.campoFecha := 0;
         end;
 
-        procedure menuModificacionPoliza(var fPol : tArchivoPolizas; indiceRegistro : Integer; var poliza : datosPoliza);
+        procedure menuFormularioPoliza(var fPol : tArchivoPolizas; modo : tModoFormularioPoliza; indiceRegistro : Integer; dni : tDNI; patente : tPatente; var poliza : datosPoliza; var registrado : Boolean);
         var
             form : registroFormularioPoliza;
             polizaCopia : datosPoliza;
             k : tecla;
-            salir, confirmado : Boolean;
+            salir, confirmado, esValido : Boolean;
+            errorMsg : String;
             menuError : registroMenu;
-            selErr : Integer;
+            selErr, i : Integer;
         begin
-            if not poliza.estado then
+            registrado := false;
+
+            if (modo = modoEditarPoliza) and (not poliza.estado) then
             begin
                 inicializarMenu(menuError);
                 agregarOpcion(menuError, 'Aceptar');
@@ -1306,8 +1329,22 @@ implementation
                 exit;
             end;
 
-            polizaCopia := poliza;
-            inicializarFormularioPoliza(form, modoEditarPoliza);
+            inicializarFormularioPoliza(form, modo);
+
+            if modo = modoAltaPoliza then
+            begin
+                inicializarPoliza(polizaCopia);
+                polizaCopia.numPol := generarNumeroDePoliza(fPol, FileSize(fPol));
+                polizaCopia.DNI := dni;
+                polizaCopia.patente := patente;
+            end
+            else
+            begin
+                polizaCopia := poliza;
+                for i := 1 to 6 do
+                    form.completados[i] := true;
+            end;
+
             salir := false;
             ClrScr;
             dibujarFormularioPolizaCompleto(polizaCopia, form);
@@ -1321,15 +1358,37 @@ implementation
                     escape: salir := true;
                     enter:
                         case form.seleccion of
-                            1..2:
+                            1, 2:
                             begin
                                 editarCampoTextoPoliza(polizaCopia, form, confirmado);
                                 if confirmado then
                                 begin
+                                    form.completados[form.seleccion] := true;
+
+                                    if form.seleccion = 1 then
+                                    begin
+                                        verificarModelo(polizaCopia.modelo, polizaCopia.marca, esValido, errorMsg);
+                                        if not esValido then
+                                        begin
+                                            polizaCopia.modelo := '';
+                                            form.completados[2] := false;
+                                            form.completados[3] := false;
+                                        end;
+                                    end;
+
+                                    if form.completados[3] then
+                                    begin
+                                        verificarYearVehicle(polizaCopia.yearVehicle, LowerCase(polizaCopia.modelo), esValido, errorMsg);
+                                        if not esValido then
+                                            form.completados[3] := false;
+                                    end;
+
                                     polizaCopia.sumaAsegurada := 676767;
                                     polizaCopia.valorCuota := valorCuota(polizaCopia);
                                 end;
-                                dibujarFilaPoliza(polizaCopia, form, form.seleccion);
+                                dibujarFilaPoliza(polizaCopia, form, 1);
+                                dibujarFilaPoliza(polizaCopia, form, 2);
+                                dibujarFilaPoliza(polizaCopia, form, 3);
                                 dibujarFilaPoliza(polizaCopia, form, 7);
                                 dibujarFilaPoliza(polizaCopia, form, 8);
                                 dibujarFilaPoliza(polizaCopia, form, 10);
@@ -1339,6 +1398,7 @@ implementation
                                 editarYearVehiclePoliza(polizaCopia.yearVehicle, form, 3, confirmado, polizaCopia);
                                 if confirmado then
                                 begin
+                                    form.completados[3] := true;
                                     polizaCopia.sumaAsegurada := 676767;
                                     polizaCopia.valorCuota := valorCuota(polizaCopia);
                                 end;
@@ -1365,7 +1425,10 @@ implementation
                             begin
                                 editarFechaPoliza(polizaCopia.fecha.vigenciaDesde, form, 5, confirmado, polizaCopia);
                                 if confirmado then
+                                begin
+                                    form.completados[5] := true;
                                     polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                end;
                                 dibujarFilaPoliza(polizaCopia, form, 5);
                                 dibujarFilaPoliza(polizaCopia, form, 7);
                                 dibujarFilaPoliza(polizaCopia, form, 8);
@@ -1375,125 +1438,27 @@ implementation
                             begin
                                 editarFechaPoliza(polizaCopia.fecha.vigenciaHasta, form, 6, confirmado, polizaCopia);
                                 if confirmado then
+                                begin
+                                    form.completados[6] := true;
                                     polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                end;
                                 dibujarFilaPoliza(polizaCopia, form, 6);
                                 dibujarFilaPoliza(polizaCopia, form, 7);
                                 dibujarFilaPoliza(polizaCopia, form, 8);
                                 dibujarFilaPoliza(polizaCopia, form, 10);
                             end;
                             10:
-                            begin
-                                poliza := polizaCopia;
-                                escribirArchivoPolizas(fPol, indiceRegistro, poliza);
-                                salir := true;
-                            end;
-                        end;
-                end;
-            until salir;
-            ClrScr;
-        end;
-
-        procedure menuAltaPoliza(var fPol : tArchivoPolizas; dni : tDNI; patente : tPatente; var registrado : Boolean);
-        var
-            poliza : datosPoliza;
-            form : registroFormularioPoliza;
-            k : tecla;
-            salir, confirmado : Boolean;
-        begin
-            registrado := false;
-            inicializarPoliza(poliza);
-            poliza.numPol := generarNumeroDePoliza(fPol, FileSize(fPol));
-            poliza.DNI := dni;
-            poliza.patente := patente;
-
-            inicializarFormularioPoliza(form, modoAltaPoliza);
-            salir := false;
-            ClrScr;
-            dibujarFormularioPolizaCompleto(poliza, form);
-
-            repeat
-                k := leerTecla;
-
-                case k of
-                    arriba: moverFilaPoliza(poliza, form, -1);
-                    abajo:  moverFilaPoliza(poliza, form, 1);
-                    escape: salir := true;
-                    enter:
-                        case form.seleccion of
-                            1, 2:
-                            begin
-                                editarCampoTextoPoliza(poliza, form, confirmado);
-                                if confirmado then
-                                begin
-                                    form.completados[form.seleccion] := true;
-                                    poliza.sumaAsegurada := 676767;
-                                    poliza.valorCuota := valorCuota(poliza);
-                                end;
-                                dibujarFilaPoliza(poliza, form, form.seleccion);
-                                dibujarFilaPoliza(poliza, form, 7);
-                                dibujarFilaPoliza(poliza, form, 8);
-                                dibujarFilaPoliza(poliza, form, 10);
-                            end;
-                            3:
-                            begin
-                                editarYearVehiclePoliza(poliza.yearVehicle, form, 3, confirmado, poliza);
-                                if confirmado then
-                                begin
-                                    form.completados[3] := true;
-                                    poliza.sumaAsegurada := 676767;
-                                    poliza.valorCuota := valorCuota(poliza);
-                                end;
-                                dibujarFilaPoliza(poliza, form, 3);
-                                dibujarFilaPoliza(poliza, form, 7);
-                                dibujarFilaPoliza(poliza, form, 8);
-                                dibujarFilaPoliza(poliza, form, 10);
-                            end;
-                            4:
-                            begin
-                                editarCoberturaPoliza(poliza.cobertura, form, 4, confirmado, poliza);
-                                if confirmado then
-                                begin
-                                    form.completados[4] := true;
-                                    poliza.sumaAsegurada := 676767;
-                                    poliza.valorCuota := valorCuota(poliza);
-                                end;
-                                dibujarFilaPoliza(poliza, form, 4);
-                                dibujarFilaPoliza(poliza, form, 7);
-                                dibujarFilaPoliza(poliza, form, 8);
-                                dibujarFilaPoliza(poliza, form, 10); 
-                            end;
-                            5:
-                            begin
-                                editarFechaPoliza(poliza.fecha.vigenciaDesde, form, 5, confirmado, poliza);
-                                if confirmado then
-                                begin
-                                    form.completados[5] := true;
-                                    poliza.valorCuota := valorCuota(poliza);
-                                end;
-                                dibujarFilaPoliza(poliza, form, 5);
-                                dibujarFilaPoliza(poliza, form, 7);
-                                dibujarFilaPoliza(poliza, form, 8);
-                                dibujarFilaPoliza(poliza, form, 10);
-                            end;
-                            6:
-                            begin
-                                editarFechaPoliza(poliza.fecha.vigenciaHasta, form, 6, confirmado, poliza);
-                                if confirmado then
-                                begin
-                                    form.completados[6] := true;
-                                    poliza.valorCuota := valorCuota(poliza);
-                                end;
-                                dibujarFilaPoliza(poliza, form, 6);
-                                dibujarFilaPoliza(poliza, form, 7);
-                                dibujarFilaPoliza(poliza, form, 8);
-                                dibujarFilaPoliza(poliza, form, 10);
-                            end;
-                            10:
                                 if todosCompletadosPoliza(form) then
                                 begin
-                                    poliza.sumaAsegurada := 676767;
-                                    poliza.valorCuota := valorCuota(poliza);
-                                    agregarPoliza(fPol, poliza);
+                                    polizaCopia.sumaAsegurada := 676767;
+                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                    poliza := polizaCopia;
+
+                                    if modo = modoAltaPoliza then
+                                        agregarPoliza(fPol, poliza)
+                                    else
+                                        escribirArchivoPolizas(fPol, indiceRegistro, poliza);
+
                                     registrado := true;
                                     salir := true;
                                 end;
@@ -1538,10 +1503,7 @@ implementation
                         limpiarConsolaEn(menuOpciones.ventana);
 
                         case seleccionOpcion of
-                            1: 
-                            begin
-                                menuModificacionPoliza(fPol, indiceRegistro, poliza);
-                            end;
+                            1: menuFormularioPoliza(fPol, modoEditarPoliza, indiceRegistro, poliza.DNI, poliza.patente, poliza, polizaRegistrada);
                             2:
                             begin
                                 inicializarMenu(menuConfirmacion);
@@ -1590,9 +1552,7 @@ implementation
                         cliente := buscarDatosCliente(fClientes, indiceCliente);
                         
                         if cliente.estado then
-                        begin
-                            menuAltaPoliza(fPolizas, dniStr, patenteStr, polizaRegistrada);
-                        end
+                            menuFormularioPoliza(fPolizas, modoAltaPoliza, -1, dniStr, patenteStr, poliza, polizaRegistrada)
                         else
                         begin
                             ClrScr;

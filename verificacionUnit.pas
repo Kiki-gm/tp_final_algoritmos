@@ -315,7 +315,7 @@ implementation
                 end
                 else
                 begin
-                    if (esCaracterDireccion(address[i+1])) or (esCaracterDireccion(address[i-1])) then
+                    if (esCaracterDireccion(address[i+1])) or (esCaracterDireccion(address[i-1])) and (not (address[i] = ' ')) then
                     begin
                         valid := false;
                         error := 'Doble caracter junto';
@@ -342,17 +342,21 @@ implementation
                         begin
                             if (i = 1) and (not (address[i] = '"')) then 
                                 valid := False;
+                                error := 'Uso incorrecto de caracteres especiales';
                             if (ord(address[i+1]) = 39) or (address[i+1] = '-') or (address[i+1] = '"') then
                                 valid := False; 
+                                error := 'Uso incorrecto de caracteres especiales';
                             if  (address[i] = '-') and ((address[i+1] = ' ') or (address[i-1] = ' ')) then
                                 valid := False; 
+                                error := 'Uso incorrecto de caracteres especiales';
                             if  (address[i] = '"') and ((address[i+1] <> ' ') and (address[i-1] <> ' ')) then
                                 valid := False; 
+                                error := 'Uso incorrecto de caracteres especiales';
                         end 
                         else if ((ord(address[i]) = 39) or (address[i] = '-') or (address[i] = '"')) and (i = Length(address)) then
                         begin
-
                                 valid := False;
+                                error := 'Uso incorrecto de caracteres especiales';
                         end;   
                     end
                     
@@ -363,14 +367,14 @@ implementation
                         begin
                             if (not esNumero(address[i-1])) and ((address[i-1] <> ' ')) then 
                                 valid := False;
-                                error := 'Direccion ingresada no valida1';
+                                error := 'Direccion ingresada no valida';
                         end; 
                         
                         if i < length(address) then
                         begin
                             if (not esNumero(address[i+1])) and ((address[i+1] <> ' ')) then
                                 valid := False; 
-                                error := 'Direccion ingresada no valida2';
+                                error := 'Direccion ingresada no valida';
                         end;
                     end 
 

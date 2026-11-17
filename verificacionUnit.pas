@@ -1,7 +1,7 @@
 unit verificacionUnit;
 
 interface
-    uses tiposUnit, crt;
+    uses tiposUnit, crt, polizasUnit;
 
     function esLetra(c : Char) : Boolean;
     function esNumero(input : String): Boolean;
@@ -596,7 +596,7 @@ implementation
                     'fun': valid := true;
                     'vitara': valid := true;
                     'grand vitara': valid := true;
-                    'switf': valid := true;
+                    'swift': valid := true;
                 end;
             end;
             'ford':
@@ -733,7 +733,7 @@ implementation
             'fun':            if ((yearVehicle <= 2011) and (yearVehicle >= 2003)) then valid := true;
             'vitara':         if ((yearVehicle <= 2026) and (yearVehicle >= 1988)) then valid := true;
             'grand vitara':   if ((yearVehicle <= 2026) and (yearVehicle >= 1988)) then valid := true;
-            'switf':          if ((yearVehicle <= 2026) and (yearVehicle >= 1983)) then valid := true;
+            'swift':          if ((yearVehicle <= 2026) and (yearVehicle >= 1983)) then valid := true;
             'ranger':         if ((yearVehicle <= 2026) and (yearVehicle >= 1983)) then valid := true;
             'ecosport':       if ((yearVehicle <= 2022) and (yearVehicle >= 2003)) then valid := true;
             'ka':             if ((yearVehicle <= 2021) and (yearVehicle >= 1996)) then valid := true;
@@ -769,12 +769,272 @@ implementation
     // Aca mati 🤓
 
     function valorAseguradoPoliza(poliza : datosPoliza) : Real;
+    var
+        montoBase,multB, multM : Real;
+        b : tMarca;
+        m : tModelo;
     begin
-      
+        b := lowercase(poliza.marca);
+        m := lowercase(poliza.modelo);
+
+        case poliza.cobertura of 
+            responsabilidadCivil: montoBase := 10000;  
+            incendioYRoboTotal: montoBase := 16750;
+            incendioYRoboTotalYParcial: montoBase := 19300;
+            terceroCompleto: montoBase := 23500;
+            todoRiesgo: montoBase := 29150;
+        end;
+
+        case b of
+            'fiat':
+            begin
+                multB := 1.2;
+                case m of
+                    'cronos': multM := 1.05;
+                    'palio': multM := 1.15;
+                    'uno': multM := 1.1;
+                    'siena': multM := 1.075;
+                    'toro': multM := 1.1;
+                    'strada': multM := 1.0;
+                end;
+            end;
+            'peugeot':
+            begin
+                multB := 1.1675;
+                case m of
+                    '208': multM := 1.05;
+                    '206': multM := 1.05;
+                    '207 compact': multM := 1.075;
+                    'partner': multM := 1.1;
+                    '308': multM := 1.02;
+                    '2008': multM := 1.0999;
+                end;
+            end;
+            'citroen':
+            begin
+                multB := 1.15;
+                case m of
+                    'c3': multM := 1.1;
+                    'Berlingo': multM := 1.3;
+                    'c4 cactus': multM := 1.15;
+                    'c4 lounge': multM := 1.2;
+                    'c3 aircross': multM := 1.22;
+                    'basalt': multM := 1.2;
+                end;
+            end;
+            'jeep':
+            begin
+                multB := 1.2;
+                case m of
+                    'renegade': multM := 1.1;
+                    'compass': multM := 1.2;
+                    'commander': multM := 1.125;
+                    'grand cherokee': multM := 1.1;
+                    'cherokee': multM := 1.225;
+                    'wrangler': multM := 1.2;
+                end;
+            end;
+            'toyota':
+            begin
+                multB := 1.3;
+                case m of
+                    'hilux': multM := 1.2;
+                    'corola': multM := 1.4;
+                    'etios': multM := 1.1;
+                    'yaris': multM := 1.15;
+                    'corola cross': multM := 1.2;
+                    'yaris cross': multM := 1.15;
+                    'sw4': multM := 1.075;
+                end;
+            end;
+            'chevrolet':
+            begin
+                multB := 1.25;
+                case m of
+                    'corsa': multM := 1.085;
+                    'classic': multM := 1.075;
+                    'onix': multM := 1.1;
+                    'tracker': multM := 1.125;
+                    'cruze': multM := 1.1;
+                    's10': multM := 1.05;
+                    'prisma': multM := 1.2;
+                end;
+            end;
+            'volkswagen':
+            begin
+                multB := 1.3;
+                case m of
+                    'gol': multM := 1.15;
+                    'amarok': multM := 1.4;
+                    'suran': multM := 1.3;
+                    'polo': multM := 1.2;
+                    't-cross': multM := 1.175;
+                    'tera': multM := 1.1;
+                    'taos': multM := 1.1;
+                end;
+            end;
+            'hyundai':
+            begin
+                multB := 1.1;
+                case m of
+                    'tucson': multM := 1.1;
+                    'creta': multM := 1.15;
+                    'hb20': multM := 1.01;
+                    'santa fe': multM := 1.2;
+                    'i10': multM := 1.075;
+                    'grand i10': multM := 1.1;
+                    'h1': multM := 1.025;
+                end;
+            end;
+            'kia':
+            begin
+                multB := 1.05;
+                case m of
+                    'sportage': multM := 1.1;
+                    'cerato': multM := 1.0333;
+                    'k3': multM := 1.2;
+                    'rio': multM := 1.2;
+                    'seltos': multM := 1.125;
+                    'sorento': multM := 1.1;
+                end;
+            end;
+            'nissan':
+            begin
+                multB := 1.2;
+                case m of
+                    'frontier': multM := 1.3;
+                    'kicks': multM := 1.2;
+                    'versa': multM := 1.15;
+                    'march': multM := 1.12;
+                    'note': multM := 1.06969;
+                    'sentra': multM := 1.1;
+                end;
+            end;
+            'renault':
+            begin
+                multB := 1.3;
+                case m of
+                    'kangoo': multM := 1.3;
+                    'sandero': multM := 1.15;
+                    'clio': multM := 1.275;
+                    'duster': multM := 1.25;
+                    'logan': multM := 1.1;
+                    'kardian': multM := 1.025;
+                end;
+            end;
+            'suzuki':
+            begin
+                multB := 1.225;
+                case m of
+                    'ax 100': multM := 1.1;         
+                    'gn 125': multM := 1.00001;      
+                    'gixxer 150': multM := 1.00002;            
+                    'fun': multM := 1.00003;
+                    'vitara': multM := 1.09991;
+                    'grand vitara': multM := 1.2;
+                    'swift': multM := 1.2;
+                end;
+            end;
+            'ford':
+            begin
+                multB := 1.4;
+                case m of
+                    'ranger': multM := 1.4;
+                    'ecosport': multM := 1.1;
+                    'ka': multM := 1.15;
+                    'fiesta': multM := 1.35;
+                    'focus': multM := 1.3;
+                    'territory': multM := 1.2;
+                end;
+            end;
+            'honda':
+            begin
+                multB := 1.35;
+                case m of
+                    'wave 110': multM := 1.2;           
+                    'cg 150 titan': multM := 1.1275;       
+                    'glh 150': multM := 1.2;           
+                    'xr 150l': multM := 1.15;              
+                    'xr 250 tornado': multM := 1.1;   
+                    'hr-v': multM := 1.12;
+                    'cr-v': multM := 1.075;
+                    'civic': multM := 1.3;
+                    'fit': multM := 1.115;
+                end;
+            end;
+            'mazda':
+            begin
+                multB := 1.0025;
+                case m of   
+                    '323': multM := 1.1;
+                    '626': multM := 1.12;
+                    'b2500': multM := 1.175;
+                    'b2900': multM := 1.2;
+                    'mx-3': multM := 1.1;
+                    'mx-5 miata': multM := 1.12;
+                    'mpv': multM := 1.1;
+                end;
+            end;
+            'changan':
+            begin
+                multB := 1.2;
+                case m of   
+                    'cs55 plus': multM := 1.235;
+                    'cs15': multM := 1.1;
+                    'cs35 plus': multM := 1.15;
+                    'eado plus': multM := 1.155;
+                    'hunter': multM := 1.245;
+                    'md201': multM := 1.2;
+                    'star': multM := 1.15;
+                end;
+            end;
+        end;
+
+        valorAseguradoPoliza := montoBase * multB * multM;
+
     end;
 
+    {Se determina la cantidad de meses a pagar, y se divide la suma total por eso.}
     function valorCuotaPoliza(poliza : datosPoliza) : Real;
+    var
+        tempTotal : Real;
+        tempA1, tempA2 : word;
+        tempM1, tempM2 : 1..12;
+        tempD1, tempD2, diasMesIni, diasMesFin : 1..31;
+        contM : Word;
+        mesesExactos : Real;
     begin
-      
+        tempTotal := poliza.sumaAsegurada;
+        tempA1 := poliza.fecha.vigenciadesde.A; 
+        tempA2 := poliza.fecha.vigenciaHasta.A; 
+        tempM1 := poliza.fecha.vigenciaDesde.M;
+        tempM2 := poliza.fecha.vigenciaHasta.M; 
+        tempD1 := poliza.fecha.vigenciaDesde.D;
+        tempD2 := poliza.fecha.vigenciaHasta.D;
+        contM := 0;
+
+        {Mientras el año sea menor o igual, se cuentan los meses a cobrar, 
+         comenzando por el mes desde y terminando en el mes del año hasta}
+        while (tempM1 <= tempM2) and (tempA1 <= tempA2) do
+        begin
+            inc(contM);  
+            if tempM1 = 12 then
+            begin
+                tempM1 := 1;
+                inc(tempA1);
+            end
+            else
+                inc(tempM1);
+            
+        end; 
+        
+        {Las empresas de pólizas son muy finas en sus cálculos: consideran hasta el día.
+         Se toma el valor total calculando de meses abarcados, y se resta del inicio y el
+         final, según el día de comienzo y de fin}
+        diasMesIni := diasDelMes(poliza.fecha.vigenciaDesde.M,poliza.fecha.vigenciaDesde.A);
+        diasMesFin := diasDelMes(poliza.fecha.vigenciaHasta.M,poliza.fecha.vigenciaHasta.A);
+        mesesExactos := contM - (1/diasMesIni * (tempD1 - 1)) - ((1/diasMesFin) * (diasMesFin - (tempD2-1)));
+    
+        valorCuotaPoliza := tempTotal/mesesExactos; //Considerar que internamente, se suele trabajar con 6 decimales en las empresas de pólizas.
     end;
 end.

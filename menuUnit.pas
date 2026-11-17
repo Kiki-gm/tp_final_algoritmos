@@ -76,12 +76,6 @@ implementation
             end;
         end;
 
-        procedure recalcularMontosPoliza(var poliza : datosPoliza);
-        begin
-            poliza.sumaAsegurada := valorAseguradoPoliza(poliza);
-            poliza.valorCuota := valorCuotaPoliza(poliza);
-        end;
-
         function etiquetaCampo(campo : Integer) : String;
         begin
             case campo of
@@ -674,6 +668,12 @@ implementation
             else
                 etiquetaCampoPoliza := '';
             end;
+        end;
+
+        procedure recalcularMontosPoliza(var poliza : datosPoliza);
+        begin
+            poliza.sumaAsegurada := valorAseguradoPoliza(poliza);
+            poliza.valorCuota := valorCuotaPoliza(poliza);
         end;
 
         function obtenerCampoPolizaTexto(poliza : datosPoliza; campo : Integer) : String;

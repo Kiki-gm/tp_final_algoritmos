@@ -60,7 +60,7 @@ implementation
         i := 0;
         swap := true;
 
-        while (i < n) and swap do
+        while (i < l) and swap do
         begin
             swap := false;
             for j := 0 to (l - i - 1) do

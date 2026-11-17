@@ -76,6 +76,12 @@ implementation
             end;
         end;
 
+        procedure recalcularMontosPoliza(var poliza : datosPoliza);
+        begin
+            poliza.sumaAsegurada := valorAseguradoPoliza(poliza);
+            poliza.valorCuota := valorCuotaPoliza(poliza);
+        end;
+
         function etiquetaCampo(campo : Integer) : String;
         begin
             case campo of
@@ -1347,6 +1353,7 @@ implementation
 
             salir := false;
             ClrScr;
+            recalcularMontosPoliza(polizaCopia);
             dibujarFormularioPolizaCompleto(polizaCopia, form);
 
             repeat
@@ -1383,8 +1390,7 @@ implementation
                                             form.completados[3] := false;
                                     end;
 
-                                    polizaCopia.sumaAsegurada := 676767;
-                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                    recalcularMontosPoliza(polizaCopia);
                                 end;
                                 dibujarFilaPoliza(polizaCopia, form, 1);
                                 dibujarFilaPoliza(polizaCopia, form, 2);
@@ -1399,8 +1405,7 @@ implementation
                                 if confirmado then
                                 begin
                                     form.completados[3] := true;
-                                    polizaCopia.sumaAsegurada := 676767;
-                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                    recalcularMontosPoliza(polizaCopia);
                                 end;
                                 dibujarFilaPoliza(polizaCopia, form, 3);
                                 dibujarFilaPoliza(polizaCopia, form, 7);
@@ -1413,8 +1418,7 @@ implementation
                                 if confirmado then
                                 begin
                                     form.completados[4] := true;
-                                    polizaCopia.sumaAsegurada := 676767;
-                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                    recalcularMontosPoliza(polizaCopia);
                                 end;
                                 dibujarFilaPoliza(polizaCopia, form, 4);
                                 dibujarFilaPoliza(polizaCopia, form, 7);
@@ -1427,7 +1431,7 @@ implementation
                                 if confirmado then
                                 begin
                                     form.completados[5] := true;
-                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                    recalcularMontosPoliza(polizaCopia);
                                 end;
                                 dibujarFilaPoliza(polizaCopia, form, 5);
                                 dibujarFilaPoliza(polizaCopia, form, 7);
@@ -1440,7 +1444,7 @@ implementation
                                 if confirmado then
                                 begin
                                     form.completados[6] := true;
-                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                    recalcularMontosPoliza(polizaCopia);
                                 end;
                                 dibujarFilaPoliza(polizaCopia, form, 6);
                                 dibujarFilaPoliza(polizaCopia, form, 7);
@@ -1448,10 +1452,10 @@ implementation
                                 dibujarFilaPoliza(polizaCopia, form, 10);
                             end;
                             10:
+                            begin
                                 if todosCompletadosPoliza(form) then
                                 begin
-                                    polizaCopia.sumaAsegurada := 676767;
-                                    polizaCopia.valorCuota := valorCuota(polizaCopia);
+                                    recalcularMontosPoliza(polizaCopia);
                                     poliza := polizaCopia;
 
                                     if modo = modoAltaPoliza then
@@ -1462,6 +1466,7 @@ implementation
                                     registrado := true;
                                     salir := true;
                                 end;
+                            end;
                         end;
                 end;
             until salir;

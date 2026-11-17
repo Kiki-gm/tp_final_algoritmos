@@ -31,6 +31,9 @@ interface
     procedure verificarModelo(model : tModelo; brand : tMarca; var valid : boolean; var error : String);
     procedure verificarYearVehicle(yearVehicle : Word; model : String; var valid : boolean; var error : String);
 
+    function valorAseguradoPoliza(poliza : datosPoliza) : Real;
+    function valorCuotaPoliza(poliza : datosPoliza) : Real;
+
     
 implementation
 
@@ -761,5 +764,17 @@ implementation
             'md201':          if ((yearVehicle <= 2026) and (yearVehicle >= 2009)) then valid := true;
             'star':           if ((yearVehicle <= 2026) and (yearVehicle >= 2009)) then valid := true;
         end;
+    end;
+
+    // Aca mati 🤓
+
+    function valorAseguradoPoliza(poliza : datosPoliza) : Real;
+    begin
+      
+    end;
+
+    function valorCuotaPoliza(poliza : datosPoliza) : Real;
+    begin
+      
     end;
 end.

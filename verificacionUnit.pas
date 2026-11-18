@@ -291,66 +291,81 @@ implementation
     procedure verificarDireccion(address : tDireccion; var valid : boolean; var error : String); //Esta es media rara. Habría que verla en conjunto.
     var
         i : integer;
+        spaceFound, numFound : Boolean;
+
+        function esCaracterDireccion(c : Char) : Boolean;
+        begin                           { '  }
+            esCaracterDireccion := ((c = #39) or (c = '-') or (c = '`') or (c = '^'));
+        end;
+
     begin
-        valid := True;  
+        valid := true;
+        spaceFound := false;
+        numFound := false;
 
-        for i := 1 to length(address) do
+        if Length(address) < 2 then
         begin
-            //Que no se pasen de atrevidos con los espacios
-            if (address[i] = ' ') and (i <> Length(address)) then 
-            begin
-                if address[i+1] = ' ' then
-                    valid := False; 
-                if (i = 1) then 
-                    valid := False;
-            end 
-            else if (address[i]) = ' ' then
-                valid := False;  
-
-            //Si no es una letra...
-            if ((address[i] < 'a') or (address[i] > 'z')) and ((address[i] < 'A') or (address[i] > 'Z')) then                             
+            valid := false;
+            error := 'Direccion ingresada muy corta';
+        end
+        else
+        begin
+            for i := 1 to Length(address) do 
+            begin              
+                if esCaracterDireccion(address[i]) then
                 begin
-                    //Pero es una ', - o una ", que no haya más de una consecutiva, y que no hayan ' ni - a los extremos
-                    if ((ord(address[i]) = 39) or (address[i] = '-') or (address[i] = '"')) then
+                    if (i = 1) or (i = Length(address)) then
                     begin
-                        if ((ord(address[i]) = 39) or (address[i] = '-') or (address[i] = '"')) and (i < Length(address)) then 
-                        begin
-                            if (i = 1) and (not (address[i] = '"')) then 
-                                valid := False;
-                            if (ord(address[i+1]) = 39) or (address[i+1] = '-') or (address[i+1] = '"') then
-                                valid := False; 
-                            if  (address[i] = '-') and ((address[i+1] = ' ') or (address[i-1] = ' ')) then
-                                valid := False; 
-                            if  (address[i] = '"') and ((address[i+1] <> ' ') and (address[i-1] <> ' ')) then
-                                valid := False; 
-                        end 
-                        else if ((ord(address[i]) = 39) or (address[i] = '-') or (address[i] = '"')) and (i = Length(address)) then
-                        begin
-
-                                valid := False;
-                        end;   
+                        valid := false;
+                        error := 'Caracteres sin letras precedentes o consecuentes';
                     end
-                    
-                    //Pero es un número, que no esté precedido por nada que no sea ", -, un espacio, u otro número, y que sólo esté seguido por un número o un espacio.
-                    else if esNumero(address[i]) then
+                    else
                     begin
-                        if (i > 1) then
+                        if (esCaracterDireccion(address[i+1])) or (esCaracterDireccion(address[i-1])) then
                         begin
-                            if (not esNumero(address[i-1])) and ((address[i-1] <> ' ') or (address[i-1] <> '"') or (address[i-1] <> '-')) then 
-                                valid := False;
-                        end; 
-                        
-                        if i < length(address) then
-                        begin
-                            if (not esNumero(address[i+1])) and ((address[i+1] <> ' ')) then
-                                valid := False; 
+                            valid := false;
+                            error := 'Doble caracter junto';
                         end;
-                    end 
+                    end;
+                end
+                else if (address[i] = ' ') then
+                begin
+                    spaceFound := true;
+                    if (i <= 2) then
+                    begin
+                        valid := false;
+                        error := 'Direccion ingresada no valida';
+                    end;
+                    if (i >= (Length(address) - 1)) then
+                    begin
+                        valid := false;
+                        error := 'Direccion ingresada no valida';
+                    end;
+                end
+                else if (not esLetra(address[i])) and (not esNumero(address[i])) then
+                begin
+                    valid := false;
+                    error := 'Caracter ingresado no valido';
+                end;
+                
+                if esNumero(address[i]) then
+                begin
+                    numFound := true;
+                end;
+            end;
+            
+            if not spaceFound then
+            begin
+                valid := false;
+                error := 'Falta espacio';
+            end;
 
-                    else if address[i] <> ' ' then
-                        valid := False;
-            end;  
-        end; 
+            if not numFound then
+            begin
+                valid := false;
+                error := 'Falta numero de calle';
+            end;
+        end;
     end;
 
     procedure verificarCel(phoneNum : tCelular; var valid : boolean; var error : String);
@@ -765,8 +780,6 @@ implementation
             'star':           if ((yearVehicle <= 2026) and (yearVehicle >= 2009)) then valid := true;
         end;
     end;
-
-    // Aca mati 🤓
 
     function valorAseguradoPoliza(poliza : datosPoliza) : Real;
     var
